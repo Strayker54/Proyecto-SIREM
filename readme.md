@@ -1,45 +1,100 @@
-# SIREM (Sistema Inteligente de Regulación Emocional Musical - UIS)
+# SIREM — Sistema Inteligente de Regulación Emocional Musical (UIS)
 
 Herramienta académica de apoyo técnico a profesionales de psicología, orientación y bienestar universitario para estructurar secuencias musicales personalizadas mediante criterios reproducibles de valencia y activación $(V, A)$ bajo el **Principio ISO** y el **Modelo Circumplejo de Russell** $[-1, 1]^2$, documentándolas en una Ficha Técnica institucional trazable.
 
-## Equipo de Trabajo (Grupo 9 & Grupo 1 — Escuela de Ingeniería de Sistemas e Informática, UIS)
-- **Andrés Santiago Marín Forero** – Dirección y Finanzas / Coordinación general
-- **Anthoni Lexandre Hernández Díaz** – Arquitectura musical y algoritmos
-- **Karol Yamile Palomino Prada** – Responsabilidad técnica y datos
-- **Giselle Alejandra Vesga Romero** – Interfaz, ficha técnica y riesgos
+> **Alcance de apoyo no clínico y cumplimiento normativo:** SIREM documenta parámetros geométricos en el espacio $(V, A)$ sobre anotaciones psicométricas publicadas (DEAM y PMEmo); no emite diagnósticos clínicos, no sustituye el juicio del profesional ni garantiza eficacia terapéutica. Cumple con la **Ley 23 de 1982** (sin almacenamiento ni distribución de archivos de audio MP3/WAV; uso exclusivo de metadatos y enlaces externos verificados) y la **Ley 1581 de 2012** (identificadores seudonimizados libres de datos personales sensibles).
 
-## Arquitectura Modular del Repositorio
+---
+
+## Equipo de Trabajo (Escuela de Ingeniería de Sistemas e Informática — UIS)
+- **Andrés Santiago Marín Forero** — Dirección, Finanzas, Cronograma y Línea Base MGA
+- **Anthoni Lexandre Hernández Díaz** — Arquitectura Musical y Motor Algorítmico (Dijkstra / Markov)
+- **Karol Yamile Palomino Prada** — Ingeniería de Datos, Limpieza y Normalización (DEAM + PMEmo)
+- **Giselle Alejandra Vesga Romero** — Interfaz Web, Ficha Técnica, Usabilidad y Gestión de Riesgos
+
+---
+
+## Matriz de Trazabilidad Académica (`CA1` a `CA5` — Guías 1 a 7 UIS)
+
+| Criterio | Requisito Académico y Umbral de Aceptación | Scripts Python (`src/`) | Pruebas Automatizadas (`tests/`) | Evidencias y Reportes (`docs/` y `data/`) | Módulos React + TypeScript (`frontend/src/`) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`CA1`** | Catálogo integrado y normalizado $\ge 500$ pistas en $[-1, 1]^2$ con 0% faltantes (**1.284 pistas**: 522 DEAM + 762 PMEmo a partir de 2.596 brutos). | `src/data_cleaning.py`<br>`src/data_loader.py` | `tests/test_ca1_catalog.py` | `data/catalogo_sirem_1284.csv`<br>`frontend/src/data/catalog_1284.json`<br>`docs/diccionario_datos_v1.md`<br>`docs/reporte_auditoria_ca1.md`<br>`config/schema_contract.json` | `CatalogAuditModule.tsx`<br>`SupabaseConfigModule.tsx`<br>`seedData.ts` |
+| **`CA2`** | Consistencia algorítmica del Principio ISO en **30 escenarios** de prueba: $\ge 90\%$ válidos (**30/30 = 100%**) cumpliendo $d_{\max}(P)\le\delta$, $\|x_1-x_{\text{ini}}\|_2\le\varepsilon_{\text{ini}}$, $e_{\text{obj}}(P)\le\varepsilon_{\text{obj}}$ y unicidad de pistas, superando a las líneas base en costo $J(P)$. | `src/routing_engine.py`<br>`src/engine/dijkstra.py`<br>`src/engine/markov.py`<br>`src/engine/baselines.py`<br>`src/engine/metrics.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_engine.py` | `docs/reporte_30_escenarios_ca2.csv`<br>`docs/reporte_30_escenarios_ca2.md`<br>`config/parameters.json` | `GeneratorModule.tsx`<br>`BenchmarkModule.tsx`<br>`RussellPlane.tsx`<br>`mathEngine.ts` |
+| **`CA3`** | Desempeño computacional sobre **100 ejecuciones** consecutivas: percentil 95 de latencia $\text{P95} \le 3{,}0\text{ s}$ ($\le 3000\text{ ms}$) por secuencia de $m \in [4, 8]$ pistas. | `src/routing_engine.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_performance.py` | `docs/benchmark_100_corridas_ca3.csv` | `BenchmarkModule.tsx`<br>`KpiCard.tsx` |
+| **`CA4`** | Generación, completitud y exportación (JSON, CSV, HTML e Impresión/PDF) de **20 casos sintéticos** seudonimizados (`SIREM-SYN-01` a `SIREM-SYN-20`) con 100% de enlaces externos válidos y sustitución controlada de pistas (Mitigación R3). | `src/ficha_exporter.py`<br>`src/exporter/json_csv_exporter.py`<br>`src/exporter/pdf_generator.py` | `tests/test_ca4_synthetic_20.py`<br>`tests/test_integration.py` | `docs/fichas_sinteticas/SIREM-SYN-01.json` … `SIREM-SYN-20.json`<br>`docs/verificacion_20_fichas_ca4.csv` | `TechnicalSheetModule.tsx`<br>`TrackSwapModal.tsx` |
+| **`CA5`** | Validación de usabilidad con consentimiento informado obligatorio (Mitigación R5), cronometraje pareado (mediana asistida $\le 5{,}0\text{ min}$, ahorro observado $30{,}55\text{ min/guía}$) y contraste frente al equilibrio económico MGA ($19{,}20\text{ min}$ en línea base original $\$7.375.000\text{ COP}$ y $19{,}29\text{ min}$ en línea base actualizada SC-01 $\$7.465.000\text{ COP}$ al $9{,}0\%\text{ E.A.}$). | `src/app_streamlit.py`<br>`src/ui/ficha_view.py` | `tests/test_integration.py` | `docs/protocolo_consentimiento_ca5.md`<br>`docs/resultados_usabilidad_ca5.csv` | `UsabilityModule.tsx`<br>`SupabaseConfigModule.tsx` |
+
+---
+
+## Arquitectura del Repositorio
+
 ```text
 Proyecto-SIREM/
+├── DEAM_Annotations.zip              # Anotaciones estáticas originales DEAM (escala [1, 9], 1.802 registros)
+├── metadata.zip                      # Metadatos originales DEAM + PMEmo (794 registros en [0, 1])
+├── vercel.json                       # Configuración de despliegue automático para Vercel (frontend/dist)
+├── requirements.txt                  # Dependencias del motor algorítmico y pruebas en Python
 ├── config/
+│   ├── settings.py                   # Constantes, rutas y parámetros globales del motor Python
 │   ├── schema_contract.json          # Contrato de datos JSON (1.284 pistas en [-1, 1]^2)
-│   └── parameters.json               # Hiperparámetros calibrados (lambda, delta, beta)
+│   └── parameters.json               # Hiperparámetros calibrados (lambda=0.65, delta=0.45, beta=6.0)
+├── data/
+│   └── catalogo_sirem_1284.csv       # Catálogo limpio y normalizado (522 DEAM + 762 PMEmo = 1.284 pistas)
 ├── supabase/
 │   └── migrations/
-│       └── 20261105_sirem_schema.sql # Esquema PostgreSQL de las 4 tablas de Supabase
-├── docs/                             # Documentación técnica, diccionario y reportes
-├── src/                              # Scripts Python de limpieza y motor algorítmico
-├── tests/                            # Pruebas de verificación cruzada (CA1 a CA4)
-└── frontend/                         # Aplicación web modular en React + TypeScript + Tailwind
-    ├── .env.example
+│       └── 20261105_sirem_schema.sql # Esquema PostgreSQL de las 4 tablas (catalog_tracks, musical_guides, benchmark_scenarios, usability_trials)
+├── docs/
+│   ├── diccionario_datos_v1.md       # Diccionario de variables y reglas de normalización lineal
+│   ├── reporte_auditoria_ca1.md      # Embudo de depuración (2.596 -> 1.284) y distribución por cuadrante
+│   ├── reporte_30_escenarios_ca2.csv # Resultados detallados de los 30 escenarios experimentales (CA2)
+│   ├── reporte_30_escenarios_ca2.md  # Reporte comparativo de los 4 algoritmos sobre los 30 escenarios
+│   ├── benchmark_100_corridas_ca3.csv# Medición de latencia en 100 corridas consecutivas (P50, P95, P99)
+│   ├── verificacion_20_fichas_ca4.csv# Matriz de auditoría de las 20 fichas sintéticas (CA4)
+│   ├── fichas_sinteticas/            # 20 fichas sintéticas exportadas (SIREM-SYN-01.json a SIREM-SYN-20.json)
+│   ├── protocolo_consentimiento_ca5.md # Protocolo de consentimiento informado y evaluación pareada (CA5)
+│   └── resultados_usabilidad_ca5.csv # Registros empíricos pareados (EVAL-01 a EVAL-06) y contraste MGA
+├── src/
+│   ├── data_cleaning.py              # Pipeline reproducible de extracción, cruce y normalización (CA1)
+│   ├── routing_engine.py             # Motor algorítmico (Dijkstra, Markov-Boltzmann, Vecino y Aleatoria)
+│   ├── ficha_exporter.py             # Exportador institucional de Fichas Técnicas (JSON, CSV, HTML)
+│   ├── app_streamlit.py              # Interfaz analítica complementaria en Python / Streamlit
+│   └── engine/                       # Submódulos modulares del motor matemático
+├── tests/
+│   ├── test_ca1_catalog.py           # Verificación automatizada del criterio CA1
+│   ├── test_ca2_ca3_benchmarks.py    # Verificación automatizada de los criterios CA2 y CA3
+│   ├── test_ca4_synthetic_20.py      # Verificación automatizada del criterio CA4 (20 fichas)
+│   ├── test_engine.py                # Pruebas unitarias de ecuaciones ISO y restricciones
+│   ├── test_integration.py           # Pruebas de integración extremo a extremo
+│   └── test_performance.py           # Pruebas de rendimiento P95 <= 3,0 s
+└── frontend/                         # Aplicación web modular en React 19 + TypeScript + Tailwind CSS 4
+    ├── .env.example                  # Plantilla de variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
     ├── package.json
     ├── tsconfig.json
     ├── vite.config.ts
-    ├── index.html
     └── src/
-        ├── types/sirem.ts
-        ├── lib/supabaseClient.ts
-        ├── services/mathEngine.ts
-        ├── data/seedData.ts
-        ├── components/
-        │   ├── layout/ (Sidebar, HeaderBanner, LegalFooter)
-        │   ├── shared/ (RussellPlane, KpiCard, TrackSwapModal)
-        │   └── modules/ (GeneratorModule, TechnicalSheetModule, CatalogAuditModule, BenchmarkModule, UsabilityModule, SupabaseConfigModule)
-        ├── App.tsx
-        └── main.tsx
+        ├── types/sirem.ts            # Tipos e interfaces del dominio afectivo-musical
+        ├── data/catalog_1284.json    # Las 1.284 pistas auditadas reales embebidas para el frontend
+        ├── data/seedData.ts          # 30 escenarios CA2, 20 casos sintéticos CA4 y ensayos CA5
+        ├── services/mathEngine.ts    # Motor matemático en TypeScript alineado con src/routing_engine.py
+        ├── lib/supabaseClient.ts     # Sincronización bidireccional por lotes (upsert) hacia Supabase + fallback local
+        └── components/               # Layout institucional, plano de Russell interactivo y los 6 módulos
 ```
 
-## Ejecución de la Aplicación Web (`frontend/`)
+---
+
+## Instrucciones de Ejecución y Verificación
+
+### 1. Pipeline de Datos y Suite de Pruebas en Python (`CA1` a `CA4`)
+Desde la raíz del repositorio:
+```bash
+# 1. Procesar archivos originales DEAM_Annotations.zip y metadata.zip -> 1.284 pistas
+python src/data_cleaning.py
+
+# 2. Ejecutar la suite completa de pruebas unitarias y de aceptación (CA1 a CA4)
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+### 2. Aplicación Web Modular en React + TypeScript (`frontend/`)
 ```bash
 cd frontend
 npm install
@@ -47,3 +102,7 @@ npx tsc --noEmit
 npm run build
 npm run dev
 ```
+
+### 3. Persistencia en Supabase (`supabase/migrations/20261105_sirem_schema.sql`)
+1. Ejecute el script SQL `supabase/migrations/20261105_sirem_schema.sql` en el editor SQL de su proyecto en Supabase para crear las 4 tablas (`catalog_tracks`, `musical_guides`, `benchmark_scenarios`, `usability_trials`).
+2. Configure `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en `frontend/.env` o directamente desde el **Módulo 6 (Persistencia en Supabase)** de la interfaz web y pulse **"Sincronizar Catálogo (1.284 pistas), 30 Escenarios y 20 Casos hacia Supabase"**.
