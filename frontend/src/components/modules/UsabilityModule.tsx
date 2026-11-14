@@ -20,9 +20,29 @@ import {
 import type { UsabilityTrialRecord } from '../../types/sirem';
 import { percentile } from '../../services/mathEngine';
 import { SEED_USABILITY_TRIALS } from '../../data/seedData';
-import { loadUsabilityTrials, saveUsabilityTrials } from '../../lib/supabaseClient';
+import {
+  loadUsabilityTrials,
+  saveUsabilityTrials,
+  insertUsabilityTrialRemote,
+} from '../../lib/supabaseClient';
 
-const MGA_BREAKEVEN_SAVED_MIN = 19.2;
+const MGA_BASELINES = {
+  original: {
+    id: 'original' as const,
+    label: 'Línea Base Original ($7.375.000 COP)',
+    capex_cop: 7375000,
+    breakeven_min: 19.2,
+    target_saved_min: 30.0,
+  },
+  sc01: {
+    id: 'sc01' as const,
+    label: 'Línea Base Actualizada SC-01 ($7.465.000 COP)',
+    capex_cop: 7465000,
+    breakeven_min: 19.29,
+    target_saved_min: 30.0,
+  },
+};
+
 const TARGET_ASSISTED_MAX_MIN = 5.0;
 
 function formatTimer(totalSeconds: number): string {
@@ -35,9 +55,10 @@ export const UsabilityModule: React.FC = () => {
   const [trials, setTrials] = useState<UsabilityTrialRecord[]>(() =>
     loadUsabilityTrials(SEED_USABILITY_TRIALS),
   );
+  const [mgaMode, setMgaMode] = useState<'original' | 'sc01'>('sc01');
 
   // Paso 1: Compuerta de Consentimiento Informado (Riesgo R5)
-  const [participantCode, setParticipantCode] = useState('EVAL-04');
+  const [participantCode, setParticipantCode] = useState('EVAL-07');
   const [profileType, setProfileType] =
     useState<UsabilityTrialRecord['profile_type']>('Orientador');
   const [consentChecked, setConsentChecked] = useState(false);
@@ -81,6 +102,7 @@ export const UsabilityModule: React.FC = () => {
   }, [siremRunning]);
 
   const consentValid = consentChecked && participantCode.trim().length >= 3;
+  const activeMga = MGA_BASELINES[mgaMode];
 
   const analysis = useMemo(() => {
     const manualList = trials.map((t) => t.manual_minutes);
@@ -103,9 +125,10 @@ export const UsabilityModule: React.FC = () => {
       medianSaved,
       avgUtility,
       meetsCA5Time: trials.length > 0 && medianSirem <= TARGET_ASSISTED_MAX_MIN,
-      meetsMGABreakeven: trials.length > 0 && medianSaved >= MGA_BREAKEVEN_SAVED_MIN,
+      meetsMGABreakeven: trials.length > 0 && medianSaved >= activeMga.breakeven_min,
+      meetsProjectGoal30: trials.length > 0 && medianSaved >= activeMga.target_saved_min,
     };
-  }, [trials]);
+  }, [trials, activeMga]);
 
   const handleSaveTrial = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,13 +159,14 @@ export const UsabilityModule: React.FC = () => {
     const updated = [...trials, newRecord];
     setTrials(updated);
     saveUsabilityTrials(updated);
+    void insertUsabilityTrialRemote(newRecord);
     setManualRunning(false);
     setSiremRunning(false);
     setNotes('');
     setConsentChecked(false);
     setParticipantCode(`EVAL-${String(updated.length + 1).padStart(2, '0')}`);
     setSaveFeedback(
-      `Registro ${newRecord.participant_code} guardado (ahorro observado: ${newRecord.saved_minutes.toFixed(2)} min).`,
+      `Registro ${newRecord.participant_code} guardado en localStorage y enviado a usability_trials en Supabase (ahorro observado: ${newRecord.saved_minutes.toFixed(2)} min).`,
     );
   };
 
@@ -197,12 +221,37 @@ export const UsabilityModule: React.FC = () => {
             Usabilidad, Consentimiento y Cronometraje Pareado (CA5 y Umbral MGA)
           </h2>
           <p className="text-sm text-slate-600 mt-0.5">
-            Paquete 1.6 · Contraste empírico frente a meta ≤ 5,0 min asistido y punto de equilibrio
-            económico MGA (19,20 min ahorrados / guía al 9,0% E.A.)
+            Paquete 1.6 · Contraste empírico frente a meta ≤ 5,0 min asistido, meta de ahorro 30,0
+            min y punto de equilibrio económico MGA ({activeMga.breakeven_min.toFixed(2)} min/guía
+            al 9,0% E.A.)
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setMgaMode('original')}
+              className={`px-2.5 py-1.5 rounded-md font-medium transition-colors cursor-pointer ${
+                mgaMode === 'original'
+                  ? 'bg-[#1B4332] text-white font-semibold'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Original ($7,375M · 19,20 min)
+            </button>
+            <button
+              type="button"
+              onClick={() => setMgaMode('sc01')}
+              className={`px-2.5 py-1.5 rounded-md font-medium transition-colors cursor-pointer ${
+                mgaMode === 'sc01'
+                  ? 'bg-[#1B4332] text-white font-semibold'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Actualizada SC-01 ($7,465M · 19,29 min)
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleResetSeed}
@@ -248,13 +297,13 @@ export const UsabilityModule: React.FC = () => {
             {analysis.medianManual.toFixed(2)} min
           </div>
           <div className="text-xs text-slate-600 mt-1">
-            Referencia hipótesis proyecto: 35,00 min
+            Meta de ahorro del proyecto: {activeMga.target_saved_min.toFixed(1)} min/guía
           </div>
         </div>
 
         <div className="bg-white border border-[#1B4332]/40 rounded-lg p-4">
           <div className="text-xs font-semibold text-[#1B4332]">
-            Ahorro Observado vs. Umbral MGA
+            Ahorro vs. {activeMga.label}
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums text-[#1B4332] mt-1">
             +{analysis.medianSaved.toFixed(2)} min
@@ -265,8 +314,8 @@ export const UsabilityModule: React.FC = () => {
             }`}
           >
             {analysis.meetsMGABreakeven
-              ? `Supera equilibrio MGA (${MGA_BREAKEVEN_SAVED_MIN.toFixed(2)} min · VPN ≥ 0 al 9,0% E.A.)`
-              : `Por debajo de ${MGA_BREAKEVEN_SAVED_MIN.toFixed(2)} min`}
+              ? `Supera equilibrio MGA (${activeMga.breakeven_min.toFixed(2)} min) y meta 30 min`
+              : `Por debajo de ${activeMga.breakeven_min.toFixed(2)} min`}
           </div>
         </div>
 

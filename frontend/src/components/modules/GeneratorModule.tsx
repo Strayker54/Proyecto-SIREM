@@ -28,6 +28,7 @@ import {
   runAllAlgorithms,
 } from '../../services/mathEngine';
 import { CLINICAL_PRESETS } from '../../data/seedData';
+import { saveMusicalGuideToSupabaseAndLocal } from '../../lib/supabaseClient';
 import { RussellPlane } from '../shared/RussellPlane';
 import { KpiCard } from '../shared/KpiCard';
 import { TrackSwapModal } from '../shared/TrackSwapModal';
@@ -108,6 +109,24 @@ export const GeneratorModule: React.FC<GeneratorModuleProps> = ({
     setSubStageIndex(null);
   };
 
+  const handlePersistAndExportToFicha = () => {
+    if (activeDijkstraView.stages.length > 0) {
+      void saveMusicalGuideToSupabaseAndLocal(
+        params,
+        activeDijkstraView.stages,
+        activeDijkstraView.metrics,
+        activeDijkstraView.execution_ms,
+        {
+          notes: manualOverrideTracks
+            ? 'Secuencia con sustitución manual controlada (Mitigación R3).'
+            : 'Secuencia óptima generada mediante Dijkstra sobre catálogo de 1.284 pistas.',
+          substitutionsCount: manualOverrideTracks ? 1 : 0,
+        },
+      );
+    }
+    onExportToFicha();
+  };
+
   const sourceCounts = useMemo(() => {
     const deam = catalog.filter((t) => t.source === 'DEAM').length;
     const pmemo = catalog.filter((t) => t.source === 'PMEmo').length;
@@ -155,7 +174,7 @@ export const GeneratorModule: React.FC<GeneratorModuleProps> = ({
           </button>
           <button
             type="button"
-            onClick={onExportToFicha}
+            onClick={handlePersistAndExportToFicha}
             disabled={activeDijkstraView.stages.length === 0}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#1B4332] rounded-lg hover:bg-[#143326] disabled:opacity-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >

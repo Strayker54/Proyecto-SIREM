@@ -11,6 +11,7 @@ import {
   ExternalLink,
   FileCheck2,
   Printer,
+  Save,
   ShieldAlert,
 } from 'lucide-react';
 import type {
@@ -25,7 +26,13 @@ import {
   solveDijkstra,
 } from '../../services/mathEngine';
 import { SYNTHETIC_CASES_20 } from '../../data/seedData';
-import { loadFichaObservations, saveFichaObservation } from '../../lib/supabaseClient';
+import {
+  type SavedMusicalGuideRecord,
+  loadFichaObservations,
+  loadSavedMusicalGuides,
+  saveFichaObservation,
+  saveMusicalGuideToSupabaseAndLocal,
+} from '../../lib/supabaseClient';
 import { RussellPlane } from '../shared/RussellPlane';
 
 interface TechnicalSheetModuleProps {
@@ -53,11 +60,15 @@ export const TechnicalSheetModule: React.FC<TechnicalSheetModuleProps> = ({
   manualOverrideTracks,
   onLoadSyntheticCase,
 }) => {
-  const [selectedCaseId, setSelectedCaseId] = useState<string>('SIREM-CASO-001');
-  const [customCaseCode, setCustomCaseCode] = useState<string>('SIREM-2026-001');
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('SIREM-SYN-01');
+  const [customCaseCode, setCustomCaseCode] = useState<string>('SIREM-SYN-01');
   const [observationsMap, setObservationsMap] = useState<Record<string, string>>(() =>
     loadFichaObservations(),
   );
+  const [savedGuides, setSavedGuides] = useState<SavedMusicalGuideRecord[]>(() =>
+    loadSavedMusicalGuides(),
+  );
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [showAudit20, setShowAudit20] = useState<boolean>(false);
 
   const zPoints = useMemo(
@@ -127,6 +138,26 @@ export const TechnicalSheetModule: React.FC<TechnicalSheetModuleProps> = ({
     setSelectedCaseId(sc.case_id);
     setCustomCaseCode(sc.case_id);
     onLoadSyntheticCase(sc);
+  };
+
+  const handleSaveCurrentSheetToGuides = async () => {
+    const res = await saveMusicalGuideToSupabaseAndLocal(
+      params,
+      activeResult.stages,
+      activeResult.metrics,
+      activeResult.execution_ms,
+      {
+        guideCode: customCaseCode,
+        notes: currentObs || 'Ficha técnica registrada desde el Módulo 2.',
+        substitutionsCount: manualOverrideTracks ? 1 : 0,
+      },
+    );
+    setSavedGuides(loadSavedMusicalGuides());
+    setSaveNotice(
+      `Ficha ${res.guideCode} guardada en musical_guides (${
+        res.syncedRemote ? 'sincronizada con Supabase' : 'guardada en localStorage'
+      }).`,
+    );
   };
 
   const handleExportJson = () => {
@@ -244,6 +275,14 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
+            onClick={() => void handleSaveCurrentSheetToGuides()}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#1B4332] bg-emerald-50 border border-[#1B4332]/30 hover:bg-emerald-100 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            Guardar en musical_guides
+          </button>
+          <button
+            type="button"
             onClick={() => setShowAudit20((v) => !v)}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#1B4332] bg-[#67B93E]/15 hover:bg-[#67B93E]/25 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
@@ -285,6 +324,12 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9
         </div>
       </div>
 
+      {saveNotice && (
+        <div className="no-print bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2.5 text-xs text-emerald-900 font-medium">
+          {saveNotice}
+        </div>
+      )}
+
       {/* Selector de los 20 casos sintéticos de prueba (oculto al imprimir) */}
       <section
         aria-label="Selector de los 20 casos sintéticos de prueba"
@@ -293,7 +338,7 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">
-              Lote Oficial de 20 Casos Sintéticos de Prueba (Criterio CA4)
+              Lote Oficial de 20 Casos Sintéticos de Prueba (Criterio CA4 · SIREM-SYN-01 a SIREM-SYN-20)
             </h3>
             <p className="text-xs text-slate-500">
               Identificadores seudonimizados libres de datos personales (Ley 1581 de 2012).
@@ -312,7 +357,7 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9
               type="text"
               value={customCaseCode}
               onChange={(e) => setCustomCaseCode(e.target.value)}
-              placeholder="SIREM-CASO-001"
+              placeholder="SIREM-SYN-01"
               className="w-40 rounded-md border border-slate-300 px-2.5 py-1 text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#67B93E]"
             />
           </div>
@@ -338,6 +383,40 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9
             );
           })}
         </div>
+
+        {savedGuides.length > 0 && (
+          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-slate-600 mr-1">
+              Pautas registradas por el usuario ({savedGuides.length}):
+            </span>
+            {savedGuides.slice(0, 8).map((g) => (
+              <button
+                key={g.guide_code}
+                type="button"
+                onClick={() => {
+                  setSelectedCaseId(g.guide_code);
+                  setCustomCaseCode(g.guide_code);
+                  onLoadSyntheticCase({
+                    case_id: g.guide_code,
+                    title: g.title || g.guide_code,
+                    context: g.context || g.professional_notes,
+                    x_ini: { v: g.v_ini, a: g.a_ini },
+                    x_obj: { v: g.v_obj, a: g.a_obj },
+                    m: g.num_stages,
+                    sourceFilter: 'ALL',
+                    lambda: g.lambda_param,
+                    delta: g.delta_max_limit,
+                    epsilon_ini: params.epsilon_ini,
+                    epsilon_obj: params.epsilon_obj,
+                  });
+                }}
+                className="px-2 py-1 text-[11px] font-mono rounded bg-emerald-50 text-[#1B4332] border border-emerald-200 hover:bg-emerald-100 cursor-pointer"
+              >
+                {g.guide_code}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Matriz desplegable de auditoría 20/20 */}
