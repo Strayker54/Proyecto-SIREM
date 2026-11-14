@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "project": "SIREM - Sistema Inteligente de Regulación Emocional Musical (UIS)",
+  "description": "Hiperparámetros geométricos y estocásticos calibrados para la secuenciación bajo el Principio ISO en el Plano Circumplejo de Russell [-1, 1]^2",
+  "calibrated_hyperparameters": {
+    "lambda": 0.65,
+    "delta": 0.65,
+    "beta": 5.0,
+    "epsilon_ini": 0.35,
+    "epsilon_obj": 0.35,
+    "default_m_stages": 6,
+    "min_stages": 4,
+    "max_stages": 8,
+    "default_seed": 2026,
+    "markov_budget": 50
+  },
+  "acceptance_thresholds": {
+    "ca1_valid_tracks": 1284,
+    "ca1_deam_tracks": 522,
+    "ca1_pmemo_tracks": 762,
+    "ca2_experimental_scenarios": 30,
+    "ca3_p95_max_latency_ms": 2000,
+    "ca3_benchmark_runs": 100,
+    "ca4_synthetic_cases": 20,
+    "ca5_target_assisted_max_min": 5.0,
+    "ca5_mga_breakeven_saved_min": 19.2,
+    "ca5_discount_rate_ea": 0.09
+  }
+}

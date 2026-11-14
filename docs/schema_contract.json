@@ -1,0 +1,47 @@
+{
+  "contract_version": "1.0.0",
+  "project": "SIREM - Sistema Inteligente de Regulación Emocional Musical",
+  "frozen_date": "2026-11-05",
+  "catalog_summary": {
+    "raw_total_records": 2596,
+    "deam_raw": 1802,
+    "pmemo_raw": 794,
+    "excluded_incomplete_metadata": 1240,
+    "excluded_duplicates": 72,
+    "valid_normalized_tracks": 1284,
+    "deam_valid": 522,
+    "pmemo_valid": 762
+  },
+  "normalization_rules": {
+    "formula": "v_norm = 2 * ((v - a) / (b - a)) - 1",
+    "target_space": "[-1.0, 1.0]^2",
+    "sources": {
+      "DEAM": { "min_a": 1.0, "max_b": 9.0, "reference": "Aljanaki et al. (2017)" },
+      "PMEmo": { "min_a": 0.0, "max_b": 1.0, "reference": "Zhang et al. (2018)" }
+    }
+  },
+  "required_track_fields": [
+    "track_id",
+    "title",
+    "artist",
+    "source",
+    "v_raw",
+    "a_raw",
+    "v_norm",
+    "a_norm",
+    "quadrant",
+    "duration_sec",
+    "external_url",
+    "license_note"
+  ],
+  "default_routing_constraints": {
+    "lambda_weight": 0.65,
+    "beta_markov": 5.0,
+    "delta_max_step": 0.65,
+    "epsilon_initial": 0.35,
+    "epsilon_target": 0.35,
+    "min_stages": 4,
+    "max_stages": 8,
+    "random_seed": 2026
+  }
+}
