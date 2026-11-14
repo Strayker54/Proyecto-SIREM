@@ -1,0 +1,6 @@
+# Dependencias de Python para el motor algorítmico y pruebas de SIREM (UIS)
+numpy>=1.26.0
+pandas>=2.1.0
+networkx>=3.2.0
+pytest>=8.0.0
+streamlit>=1.32.0
