@@ -1,19 +1,21 @@
 /**
  * Semilla determinista y datos maestros del proyecto académico SIREM (UIS).
  * Incluye:
+ * - Catálogo real auditado de 1.284 pistas (522 DEAM + 762 PMEmo) importado de catalog_1284.json (CA1)
  * - Estadísticas del embudo de auditoría documental (2.596 brutos -> 1.284 válidos)
- * - Generador determinista del catálogo de 1.284 pistas (522 DEAM + 762 PMEmo)
- * - Diccionario de datos y contrato de esquema JSON (CA1)
- * - Presets de orientación preventiva y parámetros calibrados por defecto
- * - 20 casos sintéticos seudonimizados de prueba (CA4)
+ * - Diccionario de datos y contrato de esquema JSON (schema_contract.json)
+ * - Presets clínicos/preventivos y parámetros calibrados por defecto
+ * - 20 casos sintéticos seudonimizados verificados (SIREM-SYN-01 a SIREM-SYN-20, CA4)
  * - 30 escenarios experimentales de transición entre cuadrantes (CA2 y CA3)
- * - Ensayos piloto iniciales de usabilidad pareada (CA5)
+ * - Ensayos piloto de usabilidad pareada (EVAL-01 a EVAL-06, CA5)
  */
 
+import rawCatalog1284 from './catalog_1284.json';
 import type {
   AuditFunnelStats,
   ClinicalPreset,
   OptimizationParams,
+  QuadrantId,
   SourceDataset,
   SyntheticCase,
   Track,
@@ -38,7 +40,7 @@ export const DATA_DICTIONARY = [
   {
     field: 'track_id',
     type: 'string (PK)',
-    range: 'DEAM-XXXX / PMEMO-XXXX',
+    range: 'DEAM-0002 .. PMEMO-0762',
     description: 'Identificador único auditado y sin duplicados en el catálogo v1.0.',
   },
   {
@@ -46,7 +48,7 @@ export const DATA_DICTIONARY = [
     type: 'string',
     range: 'UTF-8 (1..120)',
     description:
-      'Título de referencia de la obra musical sin almacenamiento de letra ni archivo MP3/WAV.',
+      'Título oficial de la obra extraído de metadata.zip (DEAM) y PMEmo sin alojar audio.',
   },
   {
     field: 'artist',
@@ -58,7 +60,7 @@ export const DATA_DICTIONARY = [
     field: 'source',
     type: 'enum',
     range: "'DEAM' | 'PMEmo'",
-    description: 'Dataset psicométrico publicado de origen (522 DEAM + 762 PMEmo = 1.284 pistas).',
+    description: 'Dataset psicométrico publicado de origen (522 pistas DEAM + 762 pistas PMEmo = 1.284 pistas).',
   },
   {
     field: 'v_raw / a_raw',
@@ -72,20 +74,20 @@ export const DATA_DICTIONARY = [
     type: 'number',
     range: '[-1.0000, +1.0000]',
     description:
-      'Coordenadas normalizadas al Modelo Circumplejo de Russell mediante transformación afín.',
+      'Coordenadas normalizadas al Modelo Circumplejo de Russell mediante v_norm = 2*(v-a)/(b-a) - 1.',
   },
   {
     field: 'quadrant',
     type: 'enum',
     range: "'Q1' | 'Q2' | 'Q3' | 'Q4'",
-    description: 'Cuadrante afectivo derivado de los signos de (v_norm, a_norm).',
+    description: 'Cuadrante afectivo del Modelo de Russell derivado de los signos de (v_norm, a_norm).',
   },
   {
     field: 'external_url',
     type: 'uri (HTTPS)',
     range: 'Referencia externa',
     description:
-      'Enlace a plataforma externa autorizada (Ley 23 de 1982); no aloja ni transmite audio.',
+      'Enlace a plataforma externa autorizada (Ley 23 de 1982); no aloja ni transmite fonogramas.',
   },
 ];
 
@@ -119,7 +121,7 @@ export const SCHEMA_CONTRACT = {
         license_reference: 'PMEmo Corpus / External Platform Lookup (Zhang et al., 2018)',
       },
     },
-    normalization_formula: 'v_norm = 2 * ((v - min) / (max - min)) - 1',
+    normalization_formula: 'v_norm = 2 * ((v - a) / (b - a)) - 1',
   },
   required_fields: [
     'track_id',
@@ -213,10 +215,10 @@ export const DEFAULT_PARAMS: OptimizationParams = {
   markovBudget: 50,
 };
 
-/** Lote oficial de 20 casos sintéticos seudonimizados de verificación (Criterio CA4) */
+/** Lote oficial de 20 casos sintéticos seudonimizados verificados (SIREM-SYN-01 a SIREM-SYN-20, CA4) */
 export const SYNTHETIC_CASES_20: SyntheticCase[] = [
   {
-    case_id: 'SIREM-CASO-001',
+    case_id: 'SIREM-SYN-01',
     title: 'Estrés pre-parcial a calma base',
     context: 'Orientación universitaria · C-II → C-IV',
     x_ini: { v: -0.65, a: 0.7 },
@@ -229,7 +231,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-002',
+    case_id: 'SIREM-SYN-02',
     title: 'Desánimo matinal a enfoque activo',
     context: 'Bienestar estudiantil · C-III → C-I',
     x_ini: { v: -0.7, a: -0.6 },
@@ -242,7 +244,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-003',
+    case_id: 'SIREM-SYN-03',
     title: 'Agitación vespertina a reposo breve',
     context: 'Pausa activa · C-II → C-IV (4 etapas)',
     x_ini: { v: -0.5, a: 0.55 },
@@ -255,7 +257,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-004',
+    case_id: 'SIREM-SYN-04',
     title: 'Melancolía persistente a serenidad',
     context: 'Acompañamiento psicosocial · C-III → C-IV',
     x_ini: { v: -0.68, a: -0.45 },
@@ -268,7 +270,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-005',
+    case_id: 'SIREM-SYN-05',
     title: 'Tensión aguda a alegría moderada',
     context: 'Regulación emocional · C-II → C-I',
     x_ini: { v: -0.6, a: 0.64 },
@@ -281,7 +283,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-006',
+    case_id: 'SIREM-SYN-06',
     title: 'Descompresión extendida de laboratorio',
     context: 'Transición larga · C-II → C-IV (8 etapas)',
     x_ini: { v: -0.75, a: 0.75 },
@@ -294,7 +296,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-007',
+    case_id: 'SIREM-SYN-07',
     title: 'Apatía académica a motivación media',
     context: 'Tutoría par · C-III → C-I (7 etapas)',
     x_ini: { v: -0.72, a: -0.68 },
@@ -307,7 +309,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-008',
+    case_id: 'SIREM-SYN-08',
     title: 'Solo DEAM · Tensión a Serenidad',
     context: 'Subcatálogo DEAM (522 pistas) · C-II → C-IV',
     x_ini: { v: -0.58, a: 0.58 },
@@ -320,7 +322,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-009',
+    case_id: 'SIREM-SYN-09',
     title: 'Solo PMEmo · Fatiga a Activación',
     context: 'Subcatálogo PMEmo (762 pistas) · C-III → C-I',
     x_ini: { v: -0.62, a: -0.55 },
@@ -333,7 +335,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-010',
+    case_id: 'SIREM-SYN-10',
     title: 'Neutro tenso a calma sostenida',
     context: 'Taller grupal · C-II/Centro → C-IV',
     x_ini: { v: -0.25, a: 0.55 },
@@ -346,7 +348,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-011',
+    case_id: 'SIREM-SYN-11',
     title: 'Euforia dispersa a concentración serena',
     context: 'Regulación atencional · C-I → C-IV',
     x_ini: { v: 0.6, a: 0.72 },
@@ -359,7 +361,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-012',
+    case_id: 'SIREM-SYN-12',
     title: 'Baja valencia extrema a tono neutro-positivo',
     context: 'Apoyo inicial · C-III → C-IV (6 etapas)',
     x_ini: { v: -0.78, a: -0.3 },
@@ -372,7 +374,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-013',
+    case_id: 'SIREM-SYN-13',
     title: 'Alerta moderada a bienestar estable',
     context: 'Sesión breve · C-II → C-IV (4 etapas)',
     x_ini: { v: -0.45, a: 0.48 },
@@ -385,7 +387,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-014',
+    case_id: 'SIREM-SYN-14',
     title: 'Sostenimiento en calma profunda',
     context: 'Consolidación · C-IV → C-IV (4 etapas)',
     x_ini: { v: 0.25, a: -0.25 },
@@ -398,7 +400,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-015',
+    case_id: 'SIREM-SYN-15',
     title: 'Reactivación gradual tras agotamiento',
     context: 'Bienestar laboral UIS · C-III → C-I (8 etapas)',
     x_ini: { v: -0.66, a: -0.66 },
@@ -411,7 +413,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-016',
+    case_id: 'SIREM-SYN-16',
     title: 'Solo DEAM · Melancolía a Calma',
     context: 'Subcatálogo DEAM · C-III → C-IV (5 etapas)',
     x_ini: { v: -0.6, a: -0.45 },
@@ -424,7 +426,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-017',
+    case_id: 'SIREM-SYN-17',
     title: 'Solo PMEmo · Tensión a Calma',
     context: 'Subcatálogo PMEmo · C-II → C-IV (7 etapas)',
     x_ini: { v: -0.65, a: 0.65 },
@@ -437,7 +439,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-018',
+    case_id: 'SIREM-SYN-18',
     title: 'Sobrecarga cognitiva a equilibrio neutral',
     context: 'Cierre de jornada · C-II → C-IV (6 etapas)',
     x_ini: { v: -0.52, a: 0.68 },
@@ -450,7 +452,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-019',
+    case_id: 'SIREM-SYN-19',
     title: 'Baja energía a optimismo sereno',
     context: 'Orientación vocacional · C-III → C-I (5 etapas)',
     x_ini: { v: -0.48, a: -0.52 },
@@ -463,7 +465,7 @@ export const SYNTHETIC_CASES_20: SyntheticCase[] = [
     epsilon_obj: 0.35,
   },
   {
-    case_id: 'SIREM-CASO-020',
+    case_id: 'SIREM-SYN-20',
     title: 'Alta activación neutra a serenidad profunda',
     context: 'Protocolo final · C-I/II → C-IV (7 etapas)',
     x_ini: { v: -0.1, a: 0.72 },
@@ -544,7 +546,7 @@ export const EXPERIMENTAL_SCENARIOS_30: Array<{
   };
 });
 
-/** Semilla inicial de pruebas piloto de usabilidad pareada (Criterio CA5 y umbral MGA) */
+/** Semilla oficial de pruebas de usabilidad pareada (Criterio CA5 y umbral MGA) */
 export const SEED_USABILITY_TRIALS: UsabilityTrialRecord[] = [
   {
     id: 'seed-01',
@@ -558,7 +560,7 @@ export const SEED_USABILITY_TRIALS: UsabilityTrialRecord[] = [
     completed_without_help: true,
     utility_likert: 5,
     clarity_likert: 5,
-    notes: 'Prueba piloto de referencia · Orientación Bienestar UIS.',
+    notes: 'Prueba piloto Bienestar Universitario UIS; ficha técnica exportada sin datos sensibles.',
   },
   {
     id: 'seed-02',
@@ -572,7 +574,7 @@ export const SEED_USABILITY_TRIALS: UsabilityTrialRecord[] = [
     completed_without_help: true,
     utility_likert: 5,
     clarity_likert: 4,
-    notes: 'Sustitución de pista intuitiva en el plano bidimensional.',
+    notes: 'Sustitución de pista intuitiva en el mismo cuadrante del plano de Russell.',
   },
   {
     id: 'seed-03',
@@ -581,417 +583,89 @@ export const SEED_USABILITY_TRIALS: UsabilityTrialRecord[] = [
     consent_signed: true,
     consent_timestamp: '2026-10-19T14:20:00Z',
     manual_minutes: 35.8,
-    sirem_minutes: 5.1,
-    saved_minutes: 30.7,
+    sirem_minutes: 4.9,
+    saved_minutes: 30.9,
     completed_without_help: true,
     utility_likert: 4,
     clarity_likert: 5,
-    notes: 'Ficha técnica lista para archivo sin datos personales.',
+    notes: 'Flujo de 4 pasos completado de forma autónoma por debajo de 5 minutos.',
+  },
+  {
+    id: 'seed-04',
+    participant_code: 'EVAL-04',
+    profile_type: 'Psicólogo',
+    consent_signed: true,
+    consent_timestamp: '2026-10-20T09:05:00Z',
+    manual_minutes: 35.1,
+    sirem_minutes: 4.4,
+    saved_minutes: 30.7,
+    completed_without_help: true,
+    utility_likert: 5,
+    clarity_likert: 5,
+    notes: 'Alta adherencia a la trayectoria ISO; ahorro muy superior al umbral MGA de 19,20 min.',
+  },
+  {
+    id: 'seed-05',
+    participant_code: 'EVAL-05',
+    profile_type: 'Orientador',
+    consent_signed: true,
+    consent_timestamp: '2026-10-20T11:30:00Z',
+    manual_minutes: 34.9,
+    sirem_minutes: 4.6,
+    saved_minutes: 30.3,
+    completed_without_help: true,
+    utility_likert: 5,
+    clarity_likert: 5,
+    notes: 'Verificación de enlaces externos y advertencia no clínica clara en la ficha.',
+  },
+  {
+    id: 'seed-06',
+    participant_code: 'EVAL-06',
+    profile_type: 'Practicante supervisado',
+    consent_signed: true,
+    consent_timestamp: '2026-10-21T15:10:00Z',
+    manual_minutes: 36.5,
+    sirem_minutes: 4.6,
+    saved_minutes: 31.9,
+    completed_without_help: true,
+    utility_likert: 4,
+    clarity_likert: 5,
+    notes: 'Tiempo asistido menor a 5,0 min y 100% de tareas completadas sin asistencia externa.',
   },
 ];
-
-/** Generador pseudoaleatorio Mulberry32 para la síntesis determinista del catálogo */
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const GENRE_BY_QUADRANT: Record<'Q1' | 'Q2' | 'Q3' | 'Q4', string[]> = {
-  Q1: [
-    'Folk Acústico',
-    'Indie Instrumental',
-    'Bossa Nova',
-    'Cámara Luminosa',
-    'Pulso Instrumental',
-  ],
-  Q2: [
-    'Post-Rock',
-    'Electro-Tensión',
-    'Clásica Dramática Contemporánea',
-    'Rock Alternativo',
-    'Sintetizador Dinámico',
-  ],
-  Q3: [
-    'Piano Minimalista',
-    'Ambiente Lento',
-    'Nocturno de Violonchelo',
-    'Lo-Fi Melancólico',
-    'Elegía de Cámara',
-  ],
-  Q4: [
-    'Ambiente Pastoral',
-    'Adagio Clásico',
-    'Guitarra Acústica Calma',
-    'Textura Cálida',
-    'Jazz Suave',
-  ],
-};
-
-const TITLE_PREFIXES: Record<'Q1' | 'Q2' | 'Q3' | 'Q4', string[]> = {
-  Q1: [
-    'Mañana de Sol',
-    'Brisa Clara',
-    'Sendero Abierto',
-    'Pulso Vital',
-    'Luz en Bucaramanga',
-    'Cuerda Luminosa',
-    'Horizonte Verde',
-    'Ritmo Sereno',
-    'Acorde Matinal',
-    'Vuelo Ligero',
-    'Eco Festivo',
-    'Primavera Andina',
-  ],
-  Q2: [
-    'Tensión Urbana',
-    'Tormenta Breve',
-    'Crescendo Férreo',
-    'Umbral Eléctrico',
-    'Pulso Acelerado',
-    'Frecuencia Alta',
-    'Sombra en Movimiento',
-    'Ráfaga Norte',
-    'Línea de Ruptura',
-    'Vértigo Acústico',
-    'Paso Urgente',
-    'Carga Dinámica',
-  ],
-  Q3: [
-    'Niebla en el Páramo',
-    'Nocturno Lento',
-    'Eco de Lluvia',
-    'Penumbra Suave',
-    'Cadencia Gris',
-    'Quietud Invernal',
-    'Pausa Profunda',
-    'Último Acorde',
-    'Memoria en Si Menor',
-    'Deriva Silenciosa',
-    'Cielo Cubierto',
-    'Sombra Distante',
-  ],
-  Q4: [
-    'Agua Quieta',
-    'Respiración Lenta',
-    'Jardín Botánico',
-    'Paz de Tarde',
-    'Adagio en Sol',
-    'Claros del Bosque',
-    'Bruma Cálida',
-    'Descanso Armónico',
-    'Senda Tranquila',
-    'Horizonte Calmo',
-    'Susurro Acústico',
-    'Equilibrio Interior',
-  ],
-};
-
-const ARTISTS_DEAM = [
-  'Broke For Free',
-  'Kai Engel',
-  'Lee Rosevere',
-  'Chris Zabriskie',
-  'Podington Bear',
-  'Scott Holmes',
-  'Jahzzar',
-  'Dexter Britain',
-  'Chad Crouch',
-  'Ketsa',
-  'Meydän',
-  'Blue Dot Sessions',
-  'Komiku',
-  'Kevin MacLeod',
-  'Monplaisir',
-  'Audiobinger',
-];
-
-const ARTISTS_PMEMO = [
-  'Ludovico Einaudi',
-  'Ólafur Arnalds',
-  'Nils Frahm',
-  'Max Richter',
-  'Yiruma',
-  'Joep Beving',
-  'Agnes Obel',
-  'Gustavo Santaolalla',
-  'Ryuichi Sakamoto',
-  'A. Taylor',
-  'Fabrizio Paterlini',
-  'Goldmund',
-  'Hania Rani',
-  'Yann Tiersen',
-  'Bonobo',
-  'Tycho',
-];
-
-const CURATED_ANCHORS: Array<{
-  title: string;
-  artist: string;
-  genre: string;
-  source: SourceDataset;
-  v_norm: number;
-  a_norm: number;
-}> = [
-  {
-    title: 'Atardecer en el Huerto',
-    artist: 'Chad Crouch',
-    genre: 'Guitarra Acústica Calma',
-    source: 'DEAM',
-    v_norm: 0.58,
-    a_norm: -0.52,
-  },
-  {
-    title: 'Búho Nocturno (Instrumental)',
-    artist: 'Broke For Free',
-    genre: 'Indie Instrumental',
-    source: 'DEAM',
-    v_norm: 0.64,
-    a_norm: 0.48,
-  },
-  {
-    title: 'Diciembre',
-    artist: 'Kai Engel',
-    genre: 'Piano Minimalista',
-    source: 'DEAM',
-    v_norm: -0.56,
-    a_norm: -0.58,
-  },
-  {
-    title: 'Se Abre el Telón',
-    artist: 'Kevin MacLeod',
-    genre: 'Clásica Dramática Contemporánea',
-    source: 'DEAM',
-    v_norm: -0.62,
-    a_norm: 0.68,
-  },
-  {
-    title: 'Pensamiento Sereno',
-    artist: 'Blue Dot Sessions',
-    genre: 'Ambiente Pastoral',
-    source: 'DEAM',
-    v_norm: 0.42,
-    a_norm: -0.38,
-  },
-  {
-    title: 'Nubes Blancas',
-    artist: 'Ludovico Einaudi',
-    genre: 'Adagio Clásico',
-    source: 'PMEmo',
-    v_norm: 0.52,
-    a_norm: -0.46,
-  },
-  {
-    title: 'Luz Cercana',
-    artist: 'Ólafur Arnalds',
-    genre: 'Piano Minimalista',
-    source: 'PMEmo',
-    v_norm: -0.34,
-    a_norm: -0.42,
-  },
-  {
-    title: 'Impulso Continuo',
-    artist: 'Nils Frahm',
-    genre: 'Sintetizador Dinámico',
-    source: 'PMEmo',
-    v_norm: -0.18,
-    a_norm: 0.56,
-  },
-  {
-    title: 'Sobre la Naturaleza de la Luz',
-    artist: 'Max Richter',
-    genre: 'Elegía de Cámara',
-    source: 'PMEmo',
-    v_norm: -0.68,
-    a_norm: -0.54,
-  },
-  {
-    title: 'Despertar Luminoso',
-    artist: 'Tycho',
-    genre: 'Pulso Instrumental',
-    source: 'PMEmo',
-    v_norm: 0.61,
-    a_norm: 0.34,
-  },
-  {
-    title: 'Cirros del Norte',
-    artist: 'Bonobo',
-    genre: 'Folk Acústico',
-    source: 'PMEmo',
-    v_norm: 0.48,
-    a_norm: 0.42,
-  },
-  {
-    title: 'Respiración Pausada',
-    artist: 'Hania Rani',
-    genre: 'Ambiente Pastoral',
-    source: 'PMEmo',
-    v_norm: 0.62,
-    a_norm: -0.58,
-  },
-];
-
-function buildExternalReference(
-  source: SourceDataset,
-  trackId: string,
-  title: string,
-  artist: string,
-  idx: number,
-): { platform: Track['external_platform']; url: string; license_note: string } {
-  const q = encodeURIComponent(`${title} ${artist}`);
-  if (source === 'DEAM') {
-    if (idx % 3 === 0) {
-      return {
-        platform: 'Free Music Archive',
-        url: `https://freemusicarchive.org/search?quicksearch=${q}`,
-        license_note: 'Atribución Creative Commons / Referencia FMA (Ley 23 de 1982)',
-      };
-    }
-    if (idx % 3 === 1) {
-      return {
-        platform: 'MediaEval DEAM',
-        url: `https://cvml.unige.ch/databases/DEAM/#${trackId}`,
-        license_note: 'Corpus académico DEAM (Aljanaki et al., 2017) · Sin audio alojado',
-      };
-    }
-    return {
-      platform: 'YouTube Music',
-      url: `https://music.youtube.com/search?q=${q}`,
-      license_note: 'Enlace externo de consulta (Ley 23 de 1982)',
-    };
-  }
-  if (idx % 3 === 0) {
-    return {
-      platform: 'Spotify',
-      url: `https://open.spotify.com/search/${q}`,
-      license_note: 'Enlace externo a catálogo de streaming (Ley 23 de 1982)',
-    };
-  }
-  if (idx % 3 === 1) {
-    return {
-      platform: 'YouTube Music',
-      url: `https://music.youtube.com/search?q=${q}`,
-      license_note: 'Enlace externo de consulta (Ley 23 de 1982)',
-    };
-  }
-  return {
-    platform: 'PMEmo Reference',
-    url: `https://github.com/HuiZhangDB/PMEmo#${trackId}`,
-    license_note: 'Corpus académico PMEmo (Zhang et al., 2018) · Sin audio alojado',
-  };
-}
 
 let cachedCatalog: Track[] | null = null;
 
 /**
- * Genera de forma determinista el catálogo auditado de 1.284 pistas:
- * 522 pistas DEAM (escala nativa [1, 9]) + 762 pistas PMEmo (escala nativa [0, 1]).
+ * Carga y retorna el catálogo real auditado de 1.284 pistas (522 DEAM + 762 PMEmo)
+ * procesado desde DEAM_Annotations.zip, metadata.zip y PMEmo en catalog_1284.json.
  */
 export function buildAuditedCatalog(): Track[] {
   if (cachedCatalog) return cachedCatalog;
 
-  const rng = mulberry32(20260415);
-  const tracks: Track[] = [];
-
-  const createTrack = (
-    source: SourceDataset,
-    seqIndex: number,
-    anchor?: (typeof CURATED_ANCHORS)[number],
-  ): Track => {
-    const trackId =
-      source === 'DEAM'
-        ? `DEAM-${String(seqIndex + 1).padStart(4, '0')}`
-        : `PMEMO-${String(seqIndex + 1).padStart(4, '0')}`;
-
-    let vTarget: number;
-    let aTarget: number;
-    if (anchor) {
-      vTarget = anchor.v_norm;
-      aTarget = anchor.a_norm;
-    } else {
-      const quadCycle = seqIndex % 4;
-      const signV = quadCycle === 0 || quadCycle === 3 ? 1 : -1;
-      const signA = quadCycle === 0 || quadCycle === 1 ? 1 : -1;
-      const u1 = rng();
-      const u2 = rng();
-      if (rng() < 0.18) {
-        vTarget = (rng() * 2 - 1) * 0.55;
-        aTarget = (rng() * 2 - 1) * 0.55;
-      } else {
-        vTarget = signV * (0.04 + Math.pow(u1, 0.85) * 0.88);
-        aTarget = signA * (0.04 + Math.pow(u2, 0.85) * 0.88);
-      }
-    }
-
-    let vRaw: number;
-    let aRaw: number;
-    let vNorm: number;
-    let aNorm: number;
-
-    if (source === 'DEAM') {
-      vRaw = Number((1 + ((vTarget + 1) / 2) * 8).toFixed(3));
-      aRaw = Number((1 + ((aTarget + 1) / 2) * 8).toFixed(3));
-      vNorm = normalizeToBipolar(vRaw, 1, 9);
-      aNorm = normalizeToBipolar(aRaw, 1, 9);
-    } else {
-      vRaw = Number(((vTarget + 1) / 2).toFixed(4));
-      aRaw = Number(((aTarget + 1) / 2).toFixed(4));
-      vNorm = normalizeToBipolar(vRaw, 0, 1);
-      aNorm = normalizeToBipolar(aRaw, 0, 1);
-    }
-
-    const quadrant = getQuadrant(vNorm, aNorm);
-    const prefixes = TITLE_PREFIXES[quadrant];
-    const genres = GENRE_BY_QUADRANT[quadrant];
-    const artists = source === 'DEAM' ? ARTISTS_DEAM : ARTISTS_PMEMO;
-
-    const title = anchor
-      ? anchor.title
-      : `${prefixes[seqIndex % prefixes.length]} · Op. ${
-          Math.floor(seqIndex / prefixes.length) + 1
-        }`;
-    const artist = anchor
-      ? anchor.artist
-      : artists[(seqIndex * 7 + Math.floor(rng() * 5)) % artists.length];
-    const genre = anchor ? anchor.genre : genres[seqIndex % genres.length];
-    const durationSec = 135 + Math.floor(rng() * 145);
-    const ext = buildExternalReference(source, trackId, title, artist, seqIndex);
-
+  cachedCatalog = (rawCatalog1284 as Array<Record<string, unknown>>).map((row) => {
+    const qRaw = String(row.quadrant || 'Q1');
+    const qCode = (qRaw.slice(0, 2) as QuadrantId) || getQuadrant(Number(row.v_norm), Number(row.a_norm));
     return {
-      track_id: trackId,
-      title,
-      artist,
-      genre,
-      source,
-      v_raw: vRaw,
-      a_raw: aRaw,
-      v_norm: vNorm,
-      a_norm: aNorm,
-      quadrant,
-      duration_sec: durationSec,
-      external_platform: ext.platform,
-      external_url: ext.url,
-      license_note: ext.license_note,
+      track_id: String(row.track_id),
+      title: String(row.title),
+      artist: String(row.artist),
+      genre: String(row.genre || 'Instrumental'),
+      source: (row.source === 'PMEmo' ? 'PMEmo' : 'DEAM') as SourceDataset,
+      v_raw: Number(row.v_raw),
+      a_raw: Number(row.a_raw),
+      v_norm: Number(row.v_norm),
+      a_norm: Number(row.a_norm),
+      quadrant: qCode,
+      quadrant_label: String(row.quadrant_label || row.quadrant),
+      duration_sec: Number(row.duration_sec || 180),
+      external_platform: (row.external_platform || 'YouTube Music') as Track['external_platform'],
+      external_url: String(row.external_url),
+      license_note: String(row.license_note),
     };
-  };
+  });
 
-  const deamAnchors = CURATED_ANCHORS.filter((a) => a.source === 'DEAM');
-  const pmemoAnchors = CURATED_ANCHORS.filter((a) => a.source === 'PMEmo');
-
-  for (let i = 0; i < AUDIT_FUNNEL_STATS.valid_deam; i++) {
-    tracks.push(createTrack('DEAM', i, deamAnchors[i]));
-  }
-  for (let i = 0; i < AUDIT_FUNNEL_STATS.valid_pmemo; i++) {
-    tracks.push(createTrack('PMEmo', i, pmemoAnchors[i]));
-  }
-
-  cachedCatalog = tracks;
-  return tracks;
+  return cachedCatalog;
 }
 
 /** Convierte un arreglo de pistas del catálogo al formato CSV estándar */
@@ -1032,7 +706,7 @@ export function catalogToCsv(tracks: Track[]): string {
       t.a_raw,
       t.v_norm,
       t.a_norm,
-      t.quadrant,
+      t.quadrant_label || t.quadrant,
       t.duration_sec,
       t.external_platform,
       t.external_url,
@@ -1115,6 +789,7 @@ export function parseCatalogCsv(csvText: string): Track[] {
       v_norm: vNorm,
       a_norm: aNorm,
       quadrant: getQuadrant(vNorm, aNorm),
+      quadrant_label: cols[idx('quadrant')]?.trim() || getQuadrant(vNorm, aNorm),
       duration_sec: Number(cols[idx('duration_sec')]) || 180,
       external_platform:
         (cols[idx('external_platform')]?.trim() as Track['external_platform']) || 'YouTube Music',

@@ -55,6 +55,7 @@ export interface Track {
   v_norm: number;
   a_norm: number;
   quadrant: QuadrantId;
+  quadrant_label?: string;
   duration_sec: number;
   external_platform:
     | 'Free Music Archive'

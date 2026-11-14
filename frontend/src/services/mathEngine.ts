@@ -922,6 +922,22 @@ export function findNearestSubstitutes(
 }
 
 /**
+ * Reemplaza manualmente una pista en la etapa indicada (0-based) y recalcula de inmediato
+ * J(P), d_max(P), e_ini(P), e_obj(P) y el estado de factibilidad (mitigación del riesgo R3).
+ */
+export function substituteTrackInSequence(
+  currentTracks: Track[],
+  stageIndexZeroBased: number,
+  replacementTrack: Track,
+  params: OptimizationParams,
+): { stages: StageDetail[]; metrics: SequenceMetrics } {
+  const updatedTracks = currentTracks.map((t, idx) =>
+    idx === stageIndexZeroBased ? replacementTrack : t,
+  );
+  return evaluateSequence(updatedTracks, params);
+}
+
+/**
  * Ejecuta la batería experimental completa de 30 escenarios (Criterio CA2)
  * más 100 corridas de rendimiento cronometradas para verificar P95 <= 2.0 s (Criterio CA3).
  */
