@@ -139,9 +139,10 @@ DEFAULT_HYPERPARAMETERS: Dict[str, Any] = {
     "beta": 5.0,
     "epsilon_ini": 0.35,
     "epsilon_obj": 0.35,
+    "seed": 42,
     "default_m_stages": 6,
     "min_stages": 4,
     "max_stages": 8,
-    "default_seed": 2026,
+    "default_seed": 42,
     "markov_budget": 50,
 }

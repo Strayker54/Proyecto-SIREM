@@ -7,7 +7,7 @@
  * - Presets clínicos/preventivos y parámetros calibrados por defecto
  * - 20 casos sintéticos seudonimizados verificados (SIREM-SYN-01 a SIREM-SYN-20, CA4)
  * - 30 escenarios experimentales de transición entre cuadrantes (CA2 y CA3)
- * - Ensayos piloto de usabilidad pareada (EVAL-01 a EVAL-06, CA5)
+ * - Ensayos pareados de usabilidad (EVAL-01 a EVAL-10, CA5)
  */
 
 import rawCatalog1284 from './catalog_1284.json';
@@ -211,7 +211,7 @@ export const DEFAULT_PARAMS: OptimizationParams = {
   epsilon_ini: 0.35,
   epsilon_obj: 0.35,
   sourceFilter: 'ALL',
-  seed: 2026,
+  seed: 42,
   markovBudget: 50,
 };
 

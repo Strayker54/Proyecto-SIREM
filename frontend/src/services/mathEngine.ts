@@ -21,6 +21,16 @@ import type {
   Track,
 } from '../types/sirem';
 
+/** Hiperparámetros calibrados por defecto (alineados con config/parameters.json y config/schema_contract.json) */
+export const DEFAULT_HYPERPARAMETERS = {
+  lambda: 0.65,
+  delta: 0.65,
+  beta: 5.0,
+  epsilon_ini: 0.35,
+  epsilon_obj: 0.35,
+  seed: 42,
+} as const;
+
 /** Metadatos descriptivos y cromáticos de los 4 cuadrantes del Modelo de Russell (1980) */
 export const QUADRANT_META: Record<QuadrantId, QuadrantMeta> = {
   Q1: {
@@ -986,7 +996,7 @@ export function runExperimentalBattery(
       x_ini: sc.x_ini,
       x_obj: sc.x_obj,
       m: sc.m,
-      seed: 2026 + (i + 1),
+      seed: (baseParams.seed ?? DEFAULT_HYPERPARAMETERS.seed) + (i + 1),
       markovBudget: 50,
     };
     const z = computeIdealTrajectory(params.x_ini, params.x_obj, params.m);

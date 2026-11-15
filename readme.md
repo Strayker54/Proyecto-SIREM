@@ -53,7 +53,7 @@ Proyecto-SIREM/
 │   ├── verificacion_20_fichas_ca4.csv# Matriz de auditoría de las 20 fichas sintéticas (CA4)
 │   ├── fichas_sinteticas/            # 20 fichas sintéticas exportadas (SIREM-SYN-01.json a SIREM-SYN-20.json)
 │   ├── protocolo_consentimiento_ca5.md # Protocolo de consentimiento informado y evaluación pareada (CA5)
-│   └── resultados_usabilidad_ca5.csv # Registros empíricos pareados (EVAL-01 a EVAL-06) y contraste MGA
+│   └── resultados_usabilidad_ca5.csv # Registros empíricos pareados (EVAL-01 a EVAL-10) y contraste MGA
 ├── src/
 │   ├── data_cleaning.py              # Pipeline reproducible de extracción, cruce y normalización (CA1)
 │   ├── routing_engine.py             # Motor algorítmico (Dijkstra, Markov-Boltzmann, Vecino y Aleatoria)

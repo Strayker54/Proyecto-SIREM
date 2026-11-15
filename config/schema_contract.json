@@ -35,6 +35,12 @@
     "license_note"
   ],
   "default_routing_constraints": {
+    "lambda": 0.65,
+    "delta": 0.65,
+    "beta": 5.0,
+    "epsilon_ini": 0.35,
+    "epsilon_obj": 0.35,
+    "seed": 42,
     "lambda_weight": 0.65,
     "beta_markov": 5.0,
     "delta_max_step": 0.65,
@@ -43,7 +49,7 @@
     "default_m_stages": 6,
     "min_stages": 4,
     "max_stages": 8,
-    "random_seed": 2026,
+    "random_seed": 42,
     "markov_budget": 50
   }
 }
