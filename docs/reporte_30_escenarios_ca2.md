@@ -10,21 +10,21 @@
 
 | Método Algorítmico | % Factibilidad | Costo Medio $J(P)$ | Salto Máximo Medio $d_{\max}(P)$ | Error Final Medio $e_{\text{obj}}(P)$ | Latencia $\text{P95}$ (ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **1. Dijkstra por Etapas (Principal)** | **100.0%** (30/30) | **1.3198** | **0.3303** | **0.2414** | 66.42 ms |
-| **2. Cadena de Markov (Boltzmann)** | 100.0% (30/30) | 1.6908 | 0.3913 | 0.1890 | 43.72 ms |
-| **3. Vecino Más Cercano (Línea Base)** | 16.7% | 2.6125 | 0.1598 | 1.1362 | 12.95 ms |
-| **4. Aleatoria Admisible (Línea Base)** | 100.0% | 3.5784 | 0.6069 | 0.2758 | 22.90 ms |
+| **1. Dijkstra por Etapas (Principal)** | **100.0%** (30/30) | **1.3198** | **0.3303** | **0.2414** | 65.18 ms |
+| **2. Cadena de Markov (Boltzmann)** | 100.0% (30/30) | 1.6908 | 0.3913 | 0.1890 | 44.43 ms |
+| **3. Vecino Más Cercano (Línea Base)** | 16.7% | 2.6125 | 0.1598 | 1.1362 | 13.02 ms |
+| **4. Aleatoria Admisible (Línea Base)** | 100.0% | 3.5784 | 0.6069 | 0.2758 | 20.62 ms |
 
 ---
 
 ## 2. Resultado del Benchmark de 100 Corridas Locales (`CA3`)
 
 - **Corridas ejecutadas:** 100 consultas completas sobre el catálogo de 1.284 pistas.
-- **Mediana observada ($\text{P50}$):** `94.05 ms` (`0.0941 s`).
-- **Percentil 95 observado en motor algorítmico ($\text{P95}$):** `139.03 ms` (`0.1390 s`).
+- **Mediana observada ($\text{P50}$):** `77.85 ms` (`0.0778 s`).
+- **Percentil 95 observado en motor algorítmico ($\text{P95}$):** `110.20 ms` (`0.1102 s`).
 - **Valor medido en el corte de control (con renderizado UI):** `$\text{P95} = 0{,}48\text{ s}$` (`480 ms`).
 - **Umbral máximo de aceptación (`CA3`):** $\text{P95} \le 2{,}0\text{ s}$ (`2000 ms`).
-- **Dictamen `CA3`:** **CUMPLIDO** ($\text{P95} = 0.1390\text{ s} \le 0{,}48\text{ s (corte de control)} \le 2{,}0\text{ s}$).
+- **Dictamen `CA3`:** **CUMPLIDO** ($\text{P95} = 0.1102\text{ s} \le 0{,}48\text{ s (corte de control)} \le 2{,}0\text{ s}$).
 
 ---
 

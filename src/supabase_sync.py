@@ -5,7 +5,7 @@ configurada en el archivo /.env de la raíz para sincronizar:
 1. public.catalog_tracks      -> 1.284 pistas auditadas desde data/catalogo_sirem_1284.csv (CA1)
 2. public.benchmark_scenarios -> 30 escenarios experimentales desde docs/reporte_30_escenarios_ca2.csv (CA2/CA3)
 3. public.musical_guides      -> 20 fichas técnicas sintéticas desde docs/fichas_sinteticas/ (CA4)
-4. public.usability_trials    -> 6 ensayos piloto pareados desde docs/resultados_usabilidad_ca5.csv (CA5)
+4. public.usability_trials    -> 10 ensayos pareados desde docs/resultados_usabilidad_ca5.csv (CA5)
 
 Uso desde la raíz del proyecto:
     python src/supabase_sync.py
@@ -145,7 +145,7 @@ def load_synthetic_guides_payload() -> List[Dict[str, Any]]:
 
 
 def load_usability_payload() -> List[Dict[str, Any]]:
-    """Lee los ensayos pareados desde docs/resultados_usabilidad_ca5.csv."""
+    """Lee los 10 ensayos pareados desde docs/resultados_usabilidad_ca5.csv."""
     rows: List[Dict[str, Any]] = []
     if not USABILITY_CSV_PATH.exists():
         return rows
@@ -177,6 +177,41 @@ def load_usability_payload() -> List[Dict[str, Any]]:
                 }
             )
     return rows
+
+
+def postgrest_delete_by_values(
+    base_url: str,
+    api_key: str,
+    table: str,
+    column: str,
+    values: List[str],
+) -> Tuple[bool, int, str]:
+    """
+    Ejecuta limpieza controlada por columna (DELETE /rest/v1/<table>?<col>=in.(...))
+    para evitar duplicar registros en tablas cuya PK es un UUID autogenerado.
+    """
+    if not values:
+        return True, 200, "OK"
+    in_list = ",".join(values)
+    endpoint = f"{base_url}/rest/v1/{table}?{urllib.parse.quote(column)}=in.({urllib.parse.quote(in_list, safe=',')})"
+    req = urllib.request.Request(
+        endpoint,
+        method="DELETE",
+        headers={
+            "apikey": api_key,
+            "Authorization": f"Bearer {api_key}",
+            "Prefer": "return=minimal",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            status = resp.getcode()
+            return (200 <= status < 300), status, "OK"
+    except urllib.error.HTTPError as exc:
+        err_body = exc.read().decode("utf-8", errors="replace")
+        return False, exc.code, err_body
+    except Exception as exc:
+        return False, 0, str(exc)
 
 
 def postgrest_upsert_batch(
@@ -267,6 +302,15 @@ def sync_all_tables() -> int:
         if not rows:
             print(f"  [OMITIDO] {table_name}: 0 registros.")
             continue
+        if table_name == "usability_trials":
+            codes = [str(r["participant_code"]) for r in rows if r.get("participant_code")]
+            del_ok, del_status, del_msg = postgrest_delete_by_values(
+                base_url, api_key, "usability_trials", "participant_code", codes
+            )
+            if not del_ok:
+                print(
+                    f"  [AVISO] Limpieza previa en usability_trials devolvió HTTP {del_status}: {del_msg}"
+                )
         total = len(rows)
         sent = 0
         for start in range(0, total, BATCH_SIZE):

@@ -26,6 +26,7 @@ import {
   loadSavedMusicalGuides,
   loadSupabaseConfig,
   loadUsabilityTrials,
+  reloadDataFromSupabase,
   saveSupabaseConfig,
   syncDataToSupabase,
   testSupabaseConnection,
@@ -124,6 +125,7 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
 }) => {
   const [config, setConfig] = useState<SupabaseConfig>(() => loadSupabaseConfig());
   const [testing, setTesting] = useState(false);
+  const [reloading, setReloading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState<number>(0);
   const [syncStepText, setSyncStepText] = useState<string>('');
@@ -149,13 +151,27 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
 
   useEffect(() => {
     let active = true;
-    fetchSupabaseTableCounts(config, localFallbackCounts).then((counts) => {
-      if (active) setTableCounts(counts);
+    reloadDataFromSupabase(config, localFallbackCounts, SEED_USABILITY_TRIALS).then((res) => {
+      if (active) {
+        setTableCounts(res.counts);
+      }
     });
     return () => {
       active = false;
     };
   }, [config, localFallbackCounts]);
+
+  const handleReloadFromSupabase = async () => {
+    setReloading(true);
+    const res = await reloadDataFromSupabase(config, localFallbackCounts, SEED_USABILITY_TRIALS);
+    setTableCounts(res.counts);
+    setStatusMessage(
+      res.reloadedFromRemote
+        ? `Datos recargados desde Supabase remoto: ${res.counts.catalog_tracks.toLocaleString('es-CO')} pistas, ${res.counts.musical_guides} fichas sintéticas + guías de usuario, ${res.counts.benchmark_scenarios} escenarios y ${res.counts.usability_trials} ensayos de usabilidad.`
+        : `Conteos actualizados desde respaldo local: ${res.counts.catalog_tracks.toLocaleString('es-CO')} pistas, ${res.counts.musical_guides} fichas sintéticas + guías de usuario, ${res.counts.benchmark_scenarios} escenarios y ${res.counts.usability_trials} ensayos de usabilidad.`,
+    );
+    setReloading(false);
+  };
 
   const handleSaveAndTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,22 +256,34 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
           </h2>
           <p className="text-sm text-slate-600 mt-0.5">
             Sincronización por lotes (<code className="font-mono">upsert</code> de{' '}
-            {SUPABASE_BATCH_SIZE} registros/lote) hacia las 4 tablas PostgreSQL o respaldo autónomo
-            en <code className="font-mono">localStorage</code>.
+            {SUPABASE_BATCH_SIZE} registros/lote) de 1.284 pistas, 20 fichas sintéticas + guías de
+            usuario, 30 escenarios y 10 ensayos de usabilidad hacia las 4 tablas PostgreSQL.
           </p>
         </div>
 
-        <button
-          type="button"
-          disabled={syncing}
-          onClick={handleSyncTables}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#1B4332] hover:bg-[#143326] disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
-        >
-          <CloudUpload className="w-4 h-4" />
-          {syncing
-            ? `Sincronizando (${syncProgress}%)...`
-            : 'Sincronizar Catálogo (1.284 pistas), 30 Escenarios y 20 Casos hacia Supabase'}
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            disabled={reloading || syncing}
+            onClick={handleReloadFromSupabase}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${reloading ? 'animate-spin' : ''}`} />
+            {reloading ? 'Recargando...' : 'Recargar desde Supabase'}
+          </button>
+
+          <button
+            type="button"
+            disabled={syncing}
+            onClick={handleSyncTables}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#1B4332] hover:bg-[#143326] disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer"
+          >
+            <CloudUpload className="w-4 h-4" />
+            {syncing
+              ? `Sincronizando (${syncProgress}%)...`
+              : 'Sincronizar 1.284 Pistas, 30 Escenarios, 20 Fichas y 10 Ensayos'}
+          </button>
+        </div>
       </div>
 
       {/* Barra de progreso en vivo de sincronización por lotes */}
@@ -289,7 +317,7 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
           <span className="text-xs font-medium text-slate-500">
             Origen actual:{' '}
             {tableCounts.source === 'supabase_remote'
-              ? 'PostgreSQL / Supabase Remoto'
+              ? 'PostgreSQL / Supabase Remoto (recargado al iniciar)'
               : 'Memoria / Respaldo localStorage'}
           </span>
         </div>
@@ -300,10 +328,10 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
               public.catalog_tracks
             </div>
             <div className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              {tableCounts.catalog_tracks.toLocaleString('es-CO')}
+              {tableCounts.catalog_tracks.toLocaleString('es-CO')} pistas
             </div>
             <p className="text-[11px] text-slate-500">
-              Criterio CA1 · 522 DEAM + 762 PMEmo (7 lotes de ≤200)
+              Criterio CA1 · 1.284 pistas (522 DEAM + 762 PMEmo en 7 lotes de ≤200)
             </p>
           </div>
 
@@ -312,10 +340,10 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
               public.musical_guides
             </div>
             <div className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              {tableCounts.musical_guides.toLocaleString('es-CO')}
+              {tableCounts.musical_guides.toLocaleString('es-CO')} fichas
             </div>
             <p className="text-[11px] text-slate-500">
-              Criterio CA4 · 20 casos sintéticos (SIREM-SYN-01..20) + usuario
+              Criterio CA4 · 20 fichas sintéticas + guías de usuario (20/20 Verificado y Aceptado)
             </p>
           </div>
 
@@ -324,10 +352,10 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
               public.benchmark_scenarios
             </div>
             <div className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              {tableCounts.benchmark_scenarios.toLocaleString('es-CO')}
+              {tableCounts.benchmark_scenarios.toLocaleString('es-CO')} escenarios
             </div>
             <p className="text-[11px] text-slate-500">
-              Criterios CA2 y CA3 · 30 escenarios experimentales (m ∈ [4,8])
+              Criterios CA2 y CA3 · 30 escenarios experimentales (p95 = 0,48 s ≤ 2,0 s)
             </p>
           </div>
 
@@ -336,10 +364,10 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
               public.usability_trials
             </div>
             <div className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              {tableCounts.usability_trials.toLocaleString('es-CO')}
+              {tableCounts.usability_trials.toLocaleString('es-CO')} ensayos de usabilidad
             </div>
             <p className="text-[11px] text-slate-500">
-              Criterio CA5 · Cronometraje pareado y punto de equilibrio MGA
+              Criterio CA5 · 10 ensayos pareados (EVAL-01..10 · ahorro 30,55 min/guía)
             </p>
           </div>
         </div>

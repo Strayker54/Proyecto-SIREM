@@ -20,6 +20,9 @@ PARAMETERS_PATH = CONFIG_DIR / "parameters.json"
 CATALOG_CSV_PATH = ROOT_DIR / "data" / "catalogo_sirem_1284.csv"
 
 
+FRONTEND_ENV_FILE_PATH = ROOT_DIR / "frontend" / ".env"
+
+
 def load_root_dotenv(dotenv_path: Path = ENV_FILE_PATH) -> Dict[str, str]:
     """
     Cargador nativo de archivo .env en la raíz del proyecto sin depender de librerías externas.
@@ -42,7 +45,7 @@ def load_root_dotenv(dotenv_path: Path = ENV_FILE_PATH) -> Dict[str, str]:
             ):
                 val = val[1:-1].strip()
             loaded_vars[key] = val
-            if key not in os.environ:
+            if key not in os.environ or "tu-proyecto.supabase.co" in os.environ.get(key, ""):
                 os.environ[key] = val
 
     return loaded_vars
@@ -64,12 +67,38 @@ def get_supabase_credentials() -> Dict[str, Any]:
     """
     Retorna el diccionario de credenciales de Supabase, priorizando SUPABASE_SERVICE_ROLE_KEY
     para operaciones administrativas de sincronización desde backend Python y usando
-    SUPABASE_ANON_KEY como respaldo.
+    SUPABASE_ANON_KEY (o VITE_SUPABASE_ANON_KEY desde frontend/.env) como respaldo.
     """
-    load_root_dotenv()
-    url = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
-    anon_key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
-    service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    root_vars = load_root_dotenv(ENV_FILE_PATH)
+    fe_vars = load_root_dotenv(FRONTEND_ENV_FILE_PATH)
+
+    url = (
+        root_vars.get("SUPABASE_URL")
+        or os.environ.get("SUPABASE_URL")
+        or fe_vars.get("VITE_SUPABASE_URL")
+        or ""
+    ).strip().rstrip("/")
+    if "tu-proyecto.supabase.co" in url and fe_vars.get("VITE_SUPABASE_URL"):
+        alt_url = fe_vars["VITE_SUPABASE_URL"].strip().rstrip("/")
+        if "tu-proyecto.supabase.co" not in alt_url:
+            url = alt_url
+
+    anon_key = (
+        root_vars.get("SUPABASE_ANON_KEY")
+        or os.environ.get("SUPABASE_ANON_KEY")
+        or fe_vars.get("VITE_SUPABASE_ANON_KEY")
+        or ""
+    ).strip()
+    if "tu-clave-publica" in anon_key and fe_vars.get("VITE_SUPABASE_ANON_KEY"):
+        alt_anon = fe_vars["VITE_SUPABASE_ANON_KEY"].strip()
+        if "tu-clave-publica" not in alt_anon:
+            anon_key = alt_anon
+
+    service_key = (
+        root_vars.get("SUPABASE_SERVICE_ROLE_KEY")
+        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        or ""
+    ).strip()
 
     is_placeholder_url = (not url) or ("tu-proyecto.supabase.co" in url)
     is_valid_service = bool(service_key) and ("tu-clave-privada" not in service_key)

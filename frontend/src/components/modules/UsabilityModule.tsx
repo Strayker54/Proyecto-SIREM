@@ -21,7 +21,9 @@ import type { UsabilityTrialRecord } from '../../types/sirem';
 import { percentile } from '../../services/mathEngine';
 import { SEED_USABILITY_TRIALS } from '../../data/seedData';
 import {
+  loadSupabaseConfig,
   loadUsabilityTrials,
+  reloadDataFromSupabase,
   saveUsabilityTrials,
   insertUsabilityTrialRemote,
 } from '../../lib/supabaseClient';
@@ -58,7 +60,7 @@ export const UsabilityModule: React.FC = () => {
   const [mgaMode, setMgaMode] = useState<'original' | 'sc01'>('sc01');
 
   // Paso 1: Compuerta de Consentimiento Informado (Riesgo R5)
-  const [participantCode, setParticipantCode] = useState('EVAL-07');
+  const [participantCode, setParticipantCode] = useState('EVAL-11');
   const [profileType, setProfileType] =
     useState<UsabilityTrialRecord['profile_type']>('Orientador');
   const [consentChecked, setConsentChecked] = useState(false);
@@ -76,6 +78,29 @@ export const UsabilityModule: React.FC = () => {
   const [clarityLikert, setClarityLikert] = useState<number>(5);
   const [notes, setNotes] = useState<string>('');
   const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const cfg = loadSupabaseConfig();
+    reloadDataFromSupabase(
+      cfg,
+      {
+        catalog_tracks: 1284,
+        musical_guides: 20,
+        benchmark_scenarios: 30,
+        usability_trials: SEED_USABILITY_TRIALS.length,
+      },
+      SEED_USABILITY_TRIALS,
+    ).then((res) => {
+      if (active && res.trials.length > 0) {
+        setTrials(res.trials);
+        setParticipantCode(`EVAL-${String(res.trials.length + 1).padStart(2, '0')}`);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!manualRunning) return;

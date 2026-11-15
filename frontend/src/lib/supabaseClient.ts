@@ -439,8 +439,11 @@ export async function syncDataToSupabase(
     }
     reportStep(`Upsert musical_guides: ${guides.length} fichas técnicas sincronizadas...`);
 
-    // 4. Sincronizar ensayos de usabilidad (usability_trials)
+    // 4. Sincronizar ensayos de usabilidad (usability_trials) con limpieza controlada por participant_code
     if (trials.length > 0) {
+      const codes = trials.map((tr) => tr.participant_code);
+      await client.from('usability_trials').delete().in('participant_code', codes);
+
       const trialRows = trials.map((tr) => ({
         participant_code: tr.participant_code,
         consent_verified: tr.consent_signed,
@@ -451,7 +454,13 @@ export async function syncDataToSupabase(
         utility_score: tr.utility_likert,
         observations: tr.notes,
       }));
-      await client.from('usability_trials').insert(trialRows);
+      const { error: trErr } = await client.from('usability_trials').insert(trialRows);
+      if (trErr) {
+        return {
+          ok: false,
+          message: `Error al sincronizar usability_trials: ${trErr.message}`,
+        };
+      }
     }
     reportStep(`Sincronización finalizada (${trials.length} ensayos de usabilidad)...`);
 
@@ -600,7 +609,7 @@ export async function saveMusicalGuideToSupabaseAndLocal(
 
 /**
  * Inserta directamente un ensayo de usabilidad en public.usability_trials de Supabase
- * si hay conexión activa.
+ * si hay conexión activa (realizando limpieza previa por participant_code).
  */
 export async function insertUsabilityTrialRemote(
   trial: UsabilityTrialRecord,
@@ -608,6 +617,11 @@ export async function insertUsabilityTrialRemote(
   const client = createSiremSupabaseClient();
   if (!client) return false;
   try {
+    await client
+      .from('usability_trials')
+      .delete()
+      .eq('participant_code', trial.participant_code);
+
     const { error } = await client.from('usability_trials').insert([
       {
         participant_code: trial.participant_code,
@@ -626,13 +640,157 @@ export async function insertUsabilityTrialRemote(
   }
 }
 
-/** Carga los ensayos de usabilidad desde localStorage o retorna la semilla inicial */
+/**
+ * Recarga datos (usability_trials, guías de usuario y conteos en vivo) desde Supabase
+ * al iniciar la aplicación o bajo petición manual del usuario.
+ */
+export async function reloadDataFromSupabase(
+  config: SupabaseConfig,
+  localFallback: Omit<SupabaseTableCounts, 'source'>,
+  seedFallbackTrials: UsabilityTrialRecord[],
+): Promise<{
+  counts: SupabaseTableCounts;
+  trials: UsabilityTrialRecord[];
+  reloadedFromRemote: boolean;
+}> {
+  const client = createSiremSupabaseClient(config);
+  const currentLocalTrials = loadUsabilityTrials(seedFallbackTrials);
+  if (!client || !config.connected) {
+    return {
+      counts: { ...localFallback, source: 'local_fallback' },
+      trials: currentLocalTrials,
+      reloadedFromRemote: false,
+    };
+  }
+
+  try {
+    const [counts, remoteTrialsRes, remoteGuidesRes] = await Promise.all([
+      fetchSupabaseTableCounts(config, localFallback),
+      client
+        .from('usability_trials')
+        .select('*')
+        .order('participant_code', { ascending: true }),
+      client
+        .from('musical_guides')
+        .select('*')
+        .eq('is_synthetic', false)
+        .order('created_at', { ascending: false }),
+    ]);
+
+    let finalTrials = currentLocalTrials;
+    if (!remoteTrialsRes.error && Array.isArray(remoteTrialsRes.data) && remoteTrialsRes.data.length > 0) {
+      const byCode = new Map<string, UsabilityTrialRecord>();
+      for (const row of remoteTrialsRes.data) {
+        const code = String(row.participant_code || '').trim().toUpperCase();
+        if (!code) continue;
+        const manualMin = Number(row.manual_time_min ?? 35.0);
+        const siremMin = Number(row.assisted_time_min ?? 4.6);
+        const seedMatch = seedFallbackTrials.find((s) => s.participant_code === code);
+        byCode.set(code, {
+          id: seedMatch?.id || String(row.trial_id || `remote-${code}`),
+          participant_code: code,
+          profile_type: (row.profile_type as UsabilityTrialRecord['profile_type']) || 'Orientador',
+          consent_signed: Boolean(row.consent_verified ?? true),
+          consent_timestamp: String(row.created_at || seedMatch?.consent_timestamp || new Date().toISOString()),
+          manual_minutes: Number(manualMin.toFixed(2)),
+          sirem_minutes: Number(siremMin.toFixed(2)),
+          saved_minutes: Number((manualMin - siremMin).toFixed(2)),
+          completed_without_help: Boolean(row.completed_without_help ?? true),
+          utility_likert: Number(row.utility_score ?? 5),
+          clarity_likert: seedMatch?.clarity_likert ?? 5,
+          notes: String(row.observations || ''),
+        });
+      }
+      if (byCode.size >= seedFallbackTrials.length) {
+        finalTrials = Array.from(byCode.values());
+        saveUsabilityTrials(finalTrials);
+      }
+    }
+
+    if (!remoteGuidesRes.error && Array.isArray(remoteGuidesRes.data) && remoteGuidesRes.data.length > 0) {
+      const existingLocal = loadSavedMusicalGuides();
+      const mapGuides = new Map<string, SavedMusicalGuideRecord>();
+      for (const g of existingLocal) {
+        mapGuides.set(g.guide_code, g);
+      }
+      for (const rg of remoteGuidesRes.data) {
+        const code = String(rg.guide_code || '');
+        if (!code || code.startsWith('SIREM-SYN-')) continue;
+        mapGuides.set(code, {
+          guide_code: code,
+          title: `Ruta ISO (${Number(rg.v_ini).toFixed(2)}, ${Number(rg.a_ini).toFixed(2)}) → (${Number(rg.v_obj).toFixed(2)}, ${Number(rg.a_obj).toFixed(2)})`,
+          context: `Sincronizada desde Supabase · m=${rg.num_stages} etapas`,
+          catalog_version: String(rg.catalog_version || 'v1.0-1284tracks'),
+          is_synthetic: false,
+          v_ini: Number(rg.v_ini),
+          a_ini: Number(rg.a_ini),
+          v_obj: Number(rg.v_obj),
+          a_obj: Number(rg.a_obj),
+          num_stages: Number(rg.num_stages),
+          method_used: String(rg.method_used || 'Dijkstra'),
+          lambda_param: Number(rg.lambda_param ?? 0.65),
+          delta_max_limit: Number(rg.delta_max_limit ?? 0.65),
+          cost_jp: Number(rg.cost_jp),
+          d_max_observed: Number(rg.d_max_observed),
+          e_obj_observed: Number(rg.e_obj_observed),
+          exec_time_ms: Number(rg.exec_time_ms),
+          route_tracks: Array.isArray(rg.route_tracks) ? rg.route_tracks : [],
+          substitutions_count: Number(rg.substitutions_count ?? 0),
+          professional_notes: String(rg.professional_notes || ''),
+          reviewer_role: String(rg.reviewer_role || 'Psicólogo / Orientador — Bienestar Universitario UIS'),
+          created_at: String(rg.created_at || new Date().toISOString()),
+        });
+      }
+      try {
+        localStorage.setItem(STORAGE_KEYS.savedGuides, JSON.stringify(Array.from(mapGuides.values())));
+      } catch {
+        // Ignorar restricción de almacenamiento
+      }
+    }
+
+    return {
+      counts,
+      trials: finalTrials,
+      reloadedFromRemote: counts.source === 'supabase_remote',
+    };
+  } catch {
+    return {
+      counts: { ...localFallback, source: 'local_fallback' },
+      trials: currentLocalTrials,
+      reloadedFromRemote: false,
+    };
+  }
+}
+
+/**
+ * Carga los ensayos de usabilidad desde localStorage o retorna la semilla inicial de 10 ensayos,
+ * actualizando automáticamente cualquier caché anterior que tuviera menos de los 10 registros base.
+ */
 export function loadUsabilityTrials(seedFallback: UsabilityTrialRecord[]): UsabilityTrialRecord[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.usabilityTrials);
     if (!raw) return seedFallback;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : seedFallback;
+    if (!Array.isArray(parsed) || parsed.length === 0) return seedFallback;
+
+    const seedCodes = new Set(seedFallback.map((s) => s.participant_code));
+    const customTrials = parsed.filter(
+      (r: UsabilityTrialRecord) => r && r.participant_code && !seedCodes.has(r.participant_code),
+    );
+    const hasAllSeeds = seedFallback.every((s) =>
+      parsed.some(
+        (p: UsabilityTrialRecord) =>
+          p.participant_code === s.participant_code &&
+          p.manual_minutes === s.manual_minutes &&
+          p.sirem_minutes === s.sirem_minutes,
+      ),
+    );
+    if (!hasAllSeeds) {
+      const upgraded = [...seedFallback, ...customTrials];
+      localStorage.setItem(STORAGE_KEYS.usabilityTrials, JSON.stringify(upgraded));
+      return upgraded;
+    }
+    return parsed;
   } catch {
     return seedFallback;
   }
