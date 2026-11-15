@@ -19,10 +19,10 @@ Herramienta académica de apoyo técnico a profesionales de psicología, orienta
 | Criterio | Requisito Académico y Umbral de Aceptación | Scripts Python (`src/`) | Pruebas Automatizadas (`tests/`) | Evidencias y Reportes (`docs/` y `data/`) | Módulos React + TypeScript (`frontend/src/`) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`CA1`** | Catálogo integrado y normalizado $\ge 500$ pistas en $[-1, 1]^2$ con 0% faltantes (**1.284 pistas**: 522 DEAM + 762 PMEmo a partir de 2.596 brutos). | `src/data_cleaning.py`<br>`src/data_loader.py` | `tests/test_ca1_catalog.py` | `data/catalogo_sirem_1284.csv`<br>`frontend/src/data/catalog_1284.json`<br>`docs/diccionario_datos_v1.md`<br>`docs/reporte_auditoria_ca1.md`<br>`config/schema_contract.json` | `CatalogAuditModule.tsx`<br>`SupabaseConfigModule.tsx`<br>`seedData.ts` |
-| **`CA2`** | Consistencia algorítmica del Principio ISO en **30 escenarios** de prueba: $\ge 90\%$ válidos (**30/30 = 100%**) cumpliendo $d_{\max}(P)\le\delta$, $\|x_1-x_{\text{ini}}\|_2\le\varepsilon_{\text{ini}}$, $e_{\text{obj}}(P)\le\varepsilon_{\text{obj}}$ y unicidad de pistas, superando a las líneas base en costo $J(P)$. | `src/routing_engine.py`<br>`src/engine/dijkstra.py`<br>`src/engine/markov.py`<br>`src/engine/baselines.py`<br>`src/engine/metrics.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_engine.py` | `docs/reporte_30_escenarios_ca2.csv`<br>`docs/reporte_30_escenarios_ca2.md`<br>`config/parameters.json` | `GeneratorModule.tsx`<br>`BenchmarkModule.tsx`<br>`RussellPlane.tsx`<br>`mathEngine.ts` |
-| **`CA3`** | Desempeño computacional sobre **100 ejecuciones** consecutivas: percentil 95 de latencia $\text{P95} \le 3{,}0\text{ s}$ ($\le 3000\text{ ms}$) por secuencia de $m \in [4, 8]$ pistas. | `src/routing_engine.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_performance.py` | `docs/benchmark_100_corridas_ca3.csv` | `BenchmarkModule.tsx`<br>`KpiCard.tsx` |
+| **`CA2`** | Consistencia algorítmica del Principio ISO en **30 escenarios** de prueba: $\ge 90\%$ válidos (**30/30 = 100%**) cumpliendo $d_{\max}(P) \le \delta$, $\|x_1 - x_{\text{ini}}\|_2 \le \varepsilon_{\text{ini}}$, $e_{\text{obj}}(P) \le \varepsilon_{\text{obj}}$ y unicidad de pistas, superando a las líneas base en costo $J(P)$. | `src/routing_engine.py`<br>`src/engine/dijkstra.py`<br>`src/engine/markov.py`<br>`src/engine/baselines.py`<br>`src/engine/metrics.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_engine.py` | `docs/reporte_30_escenarios_ca2.csv`<br>`docs/reporte_30_escenarios_ca2.md`<br>`config/parameters.json` | `GeneratorModule.tsx`<br>`BenchmarkModule.tsx`<br>`RussellPlane.tsx`<br>`mathEngine.ts` |
+| **`CA3`** | Desempeño computacional sobre **100 ejecuciones** consecutivas: percentil 95 de latencia $\text{P95} \le 2{,}0\text{ s}$ ($\le 2000\text{ ms}$, observado $\text{P95} = 0{,}48\text{ s}$) por secuencia de $m \in [4, 8]$ pistas. | `src/routing_engine.py` | `tests/test_ca2_ca3_benchmarks.py`<br>`tests/test_performance.py` | `docs/benchmark_100_corridas_ca3.csv` | `BenchmarkModule.tsx`<br>`KpiCard.tsx` |
 | **`CA4`** | Generación, completitud y exportación (JSON, CSV, HTML e Impresión/PDF) de **20 casos sintéticos** seudonimizados (`SIREM-SYN-01` a `SIREM-SYN-20`) con 100% de enlaces externos válidos y sustitución controlada de pistas (Mitigación R3). | `src/ficha_exporter.py`<br>`src/exporter/json_csv_exporter.py`<br>`src/exporter/pdf_generator.py` | `tests/test_ca4_synthetic_20.py`<br>`tests/test_integration.py` | `docs/fichas_sinteticas/SIREM-SYN-01.json` … `SIREM-SYN-20.json`<br>`docs/verificacion_20_fichas_ca4.csv` | `TechnicalSheetModule.tsx`<br>`TrackSwapModal.tsx` |
-| **`CA5`** | Validación de usabilidad con consentimiento informado obligatorio (Mitigación R5), cronometraje pareado (mediana asistida $\le 5{,}0\text{ min}$, ahorro observado $30{,}55\text{ min/guía}$) y contraste frente al equilibrio económico MGA ($19{,}20\text{ min}$ en línea base original $\$7.375.000\text{ COP}$ y $19{,}29\text{ min}$ en línea base actualizada SC-01 $\$7.465.000\text{ COP}$ al $9{,}0\%\text{ E.A.}$). | `src/app_streamlit.py`<br>`src/ui/ficha_view.py` | `tests/test_integration.py` | `docs/protocolo_consentimiento_ca5.md`<br>`docs/resultados_usabilidad_ca5.csv` | `UsabilityModule.tsx`<br>`SupabaseConfigModule.tsx` |
+| **`CA5`** | Validación de usabilidad con consentimiento informado obligatorio (Mitigación R5), cronometraje pareado (mediana asistida $\le 5{,}0\text{ min}$, ahorro observado $30{,}55\text{ min/guía}$) y contraste frente al equilibrio económico MGA ($19{,}20\text{ min}$ en línea base original \$7.375.000 COP y $19{,}29\text{ min}$ en línea base actualizada SC-01 \$7.465.000 COP al $9{,}0\%\text{ E.A.}$). | `src/app_streamlit.py`<br>`src/ui/ficha_view.py` | `tests/test_integration.py` | `docs/protocolo_consentimiento_ca5.md`<br>`docs/resultados_usabilidad_ca5.csv` | `UsabilityModule.tsx`<br>`SupabaseConfigModule.tsx` |
 
 ---
 
@@ -30,14 +30,15 @@ Herramienta académica de apoyo técnico a profesionales de psicología, orienta
 
 ```text
 Proyecto-SIREM/
+├── .env.example                      # Plantilla de las 3 credenciales de Supabase para Backend Python
 ├── DEAM_Annotations.zip              # Anotaciones estáticas originales DEAM (escala [1, 9], 1.802 registros)
 ├── metadata.zip                      # Metadatos originales DEAM + PMEmo (794 registros en [0, 1])
 ├── vercel.json                       # Configuración de despliegue automático para Vercel (frontend/dist)
 ├── requirements.txt                  # Dependencias del motor algorítmico y pruebas en Python
 ├── config/
-│   ├── settings.py                   # Constantes, rutas y parámetros globales del motor Python
+│   ├── settings.py                   # Cargador nativo de /.env, constantes y parámetros globales
 │   ├── schema_contract.json          # Contrato de datos JSON (1.284 pistas en [-1, 1]^2)
-│   └── parameters.json               # Hiperparámetros calibrados (lambda=0.65, delta=0.45, beta=6.0)
+│   └── parameters.json               # Hiperparámetros calibrados (lambda=0.65, delta=0.65, beta=5.0)
 ├── data/
 │   └── catalogo_sirem_1284.csv       # Catálogo limpio y normalizado (522 DEAM + 762 PMEmo = 1.284 pistas)
 ├── supabase/
@@ -48,7 +49,7 @@ Proyecto-SIREM/
 │   ├── reporte_auditoria_ca1.md      # Embudo de depuración (2.596 -> 1.284) y distribución por cuadrante
 │   ├── reporte_30_escenarios_ca2.csv # Resultados detallados de los 30 escenarios experimentales (CA2)
 │   ├── reporte_30_escenarios_ca2.md  # Reporte comparativo de los 4 algoritmos sobre los 30 escenarios
-│   ├── benchmark_100_corridas_ca3.csv# Medición de latencia en 100 corridas consecutivas (P50, P95, P99)
+│   ├── benchmark_100_corridas_ca3.csv# Medición de latencia en 100 corridas consecutivas (P95 <= 2,0 s; ref. 0,48 s)
 │   ├── verificacion_20_fichas_ca4.csv# Matriz de auditoría de las 20 fichas sintéticas (CA4)
 │   ├── fichas_sinteticas/            # 20 fichas sintéticas exportadas (SIREM-SYN-01.json a SIREM-SYN-20.json)
 │   ├── protocolo_consentimiento_ca5.md # Protocolo de consentimiento informado y evaluación pareada (CA5)
@@ -57,17 +58,18 @@ Proyecto-SIREM/
 │   ├── data_cleaning.py              # Pipeline reproducible de extracción, cruce y normalización (CA1)
 │   ├── routing_engine.py             # Motor algorítmico (Dijkstra, Markov-Boltzmann, Vecino y Aleatoria)
 │   ├── ficha_exporter.py             # Exportador institucional de Fichas Técnicas (JSON, CSV, HTML)
+│   ├── supabase_sync.py              # Sincronizador administrativo por lotes (service_role) hacia Supabase REST
 │   ├── app_streamlit.py              # Interfaz analítica complementaria en Python / Streamlit
 │   └── engine/                       # Submódulos modulares del motor matemático
 ├── tests/
 │   ├── test_ca1_catalog.py           # Verificación automatizada del criterio CA1
-│   ├── test_ca2_ca3_benchmarks.py    # Verificación automatizada de los criterios CA2 y CA3
+│   ├── test_ca2_ca3_benchmarks.py    # Verificación automatizada de los criterios CA2 y CA3 (P95 <= 2,0 s)
 │   ├── test_ca4_synthetic_20.py      # Verificación automatizada del criterio CA4 (20 fichas)
 │   ├── test_engine.py                # Pruebas unitarias de ecuaciones ISO y restricciones
 │   ├── test_integration.py           # Pruebas de integración extremo a extremo
-│   └── test_performance.py           # Pruebas de rendimiento P95 <= 3,0 s
+│   └── test_performance.py           # Pruebas de rendimiento P95 <= 2,0 s (<= 2000 ms)
 └── frontend/                         # Aplicación web modular en React 19 + TypeScript + Tailwind CSS 4
-    ├── .env.example                  # Plantilla de variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+    ├── .env.example                  # Plantilla de las 2 variables públicas VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
     ├── package.json
     ├── tsconfig.json
     ├── vite.config.ts
@@ -103,6 +105,21 @@ npm run build
 npm run dev
 ```
 
-### 3. Persistencia en Supabase (`supabase/migrations/20261105_sirem_schema.sql`)
+### 3. Configuración Segura de las 3 Credenciales y Persistencia en Supabase
 1. Ejecute el script SQL `supabase/migrations/20261105_sirem_schema.sql` en el editor SQL de su proyecto en Supabase para crear las 4 tablas (`catalog_tracks`, `musical_guides`, `benchmark_scenarios`, `usability_trials`).
-2. Configure `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en `frontend/.env` o directamente desde el **Módulo 6 (Persistencia en Supabase)** de la interfaz web y pulse **"Sincronizar Catálogo (1.284 pistas), 30 Escenarios y 20 Casos hacia Supabase"**.
+2. **En la raíz del proyecto (`/.env` — exclusivo para Backend Python):** configure las **3 credenciales** (copiando desde `.env.example`):
+   ```env
+   SUPABASE_URL="https://tu-proyecto.supabase.co"
+   SUPABASE_ANON_KEY="tu-clave-publica-anon"
+   SUPABASE_SERVICE_ROLE_KEY="tu-clave-privada-service-role-exclusiva-backend"
+   ```
+   Luego ejecute desde la terminal para sincronizar por lotes las 1.284 pistas, los 30 escenarios, las 20 fichas sintéticas y los ensayos pareados:
+   ```bash
+   python src/supabase_sync.py
+   ```
+3. **En el proyecto web (`frontend/.env` o variables de entorno en Vercel):** configure **únicamente las 2 claves públicas** (jamás incluya `service_role` en el frontend):
+   ```env
+   VITE_SUPABASE_URL="https://tu-proyecto.supabase.co"
+   VITE_SUPABASE_ANON_KEY="tu-clave-publica-anon"
+   ```
+   También puede verificar la conexión y ejecutar la sincronización por lotes directamente desde el **Módulo 6 (Persistencia en Supabase)** de la interfaz web. Tanto `/.env` como `frontend/.env` están excluidos en `.gitignore` para proteger sus secretos.
