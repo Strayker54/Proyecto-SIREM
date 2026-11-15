@@ -1,21 +1,21 @@
-case_id,title,source_filter,m_stages,cost_jp,d_max_observed,e_obj_observed,geometric_constraints_ok,required_fields_ok,catalog_version_ok,non_clinical_notice_ok,title_artist_match_ok,all_passed,json_file
-SIREM-SYN-01,Estrés pre-parcial a calma base,ALL,6,1.601775,0.367699,0.342367,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-01.json
-SIREM-SYN-02,Desánimo matinal a enfoque activo,ALL,6,1.546119,0.398129,0.25,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-02.json
-SIREM-SYN-03,Agitación vespertina a reposo breve,ALL,4,1.231696,0.442295,0.264429,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-03.json
-SIREM-SYN-04,Melancolía persistente a serenidad,ALL,5,1.072302,0.347486,0.335459,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-04.json
-SIREM-SYN-05,Tensión aguda a alegría moderada,ALL,5,1.121747,0.30762,0.256223,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-05.json
-SIREM-SYN-06,Descompresión extendida de laboratorio,ALL,8,1.954193,0.297268,0.230207,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-06.json
-SIREM-SYN-07,Apatía académica a motivación media,ALL,7,1.649042,0.322531,0.262488,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-07.json
-SIREM-SYN-08,Solo DEAM · Tensión a Serenidad,DEAM,6,1.466042,0.336341,0.314682,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-08.json
-SIREM-SYN-09,Solo PMEmo · Fatiga a Activación,PMEmo,6,1.469279,0.311862,0.291363,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-09.json
-SIREM-SYN-10,Neutro tenso a calma sostenida,ALL,5,1.286559,0.353732,0.262562,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-10.json
-SIREM-SYN-11,Euforia dispersa a concentración serena,ALL,5,1.074003,0.276803,0.314302,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-11.json
-SIREM-SYN-12,Baja valencia extrema a tono neutro-positivo,ALL,6,1.167855,0.244554,0.215215,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-12.json
-SIREM-SYN-13,Alerta moderada a bienestar estable,ALL,4,1.095808,0.425735,0.286303,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-13.json
-SIREM-SYN-14,Sostenimiento en calma profunda,ALL,4,0.617204,0.201189,0.156397,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-14.json
-SIREM-SYN-15,Reactivación gradual tras agotamiento,ALL,8,1.760661,0.285044,0.226716,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-15.json
-SIREM-SYN-16,Solo DEAM · Melancolía a Calma,DEAM,5,1.017734,0.25,0.347922,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-16.json
-SIREM-SYN-17,Solo PMEmo · Tensión a Calma,PMEmo,7,1.688343,0.334562,0.262562,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-17.json
-SIREM-SYN-18,Sobrecarga cognitiva a equilibrio neutral,ALL,6,1.241486,0.28249,0.230489,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-18.json
-SIREM-SYN-19,Baja energía a optimismo sereno,ALL,5,1.138445,0.305164,0.226716,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-19.json
-SIREM-SYN-20,Alta activación neutra a serenidad profunda,ALL,7,1.491957,0.287606,0.18868,True,True,True,True,True,True,docs/fichas_sinteticas/SIREM-SYN-20.json
+case_id,title,source_filter,m_stages,cost_jp,d_max_observed,e_obj_observed,geometric_constraints_ok,required_fields_ok,catalog_version_ok,non_clinical_notice_ok,title_artist_match_ok,all_passed,audit_status,cross_reviewed_by,json_file
+SIREM-SYN-01,Estrés pre-parcial a calma base,ALL,6,1.601775,0.367699,0.342367,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-01.json
+SIREM-SYN-02,Desánimo matinal a enfoque activo,ALL,6,1.546119,0.398129,0.25,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-02.json
+SIREM-SYN-03,Agitación vespertina a reposo breve,ALL,4,1.231696,0.442295,0.264429,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-03.json
+SIREM-SYN-04,Melancolía persistente a serenidad,ALL,5,1.072302,0.347486,0.335459,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-04.json
+SIREM-SYN-05,Tensión aguda a alegría moderada,ALL,5,1.121747,0.30762,0.256223,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-05.json
+SIREM-SYN-06,Descompresión extendida de laboratorio,ALL,8,1.954193,0.297268,0.230207,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-06.json
+SIREM-SYN-07,Apatía académica a motivación media,ALL,7,1.649042,0.322531,0.262488,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-07.json
+SIREM-SYN-08,Solo DEAM · Tensión a Serenidad,DEAM,6,1.466042,0.336341,0.314682,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-08.json
+SIREM-SYN-09,Solo PMEmo · Fatiga a Activación,PMEmo,6,1.469279,0.311862,0.291363,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-09.json
+SIREM-SYN-10,Neutro tenso a calma sostenida,ALL,5,1.286559,0.353732,0.262562,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-10.json
+SIREM-SYN-11,Euforia dispersa a concentración serena,ALL,5,1.074003,0.276803,0.314302,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-11.json
+SIREM-SYN-12,Baja valencia extrema a tono neutro-positivo,ALL,6,1.167855,0.244554,0.215215,True,True,True,True,True,True,Verificado y Aceptado,GV + AH,docs/fichas_sinteticas/SIREM-SYN-12.json
+SIREM-SYN-13,Alerta moderada a bienestar estable,ALL,4,1.095808,0.425735,0.286303,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-13.json
+SIREM-SYN-14,Sostenimiento en calma profunda,ALL,4,0.617204,0.201189,0.156397,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-14.json
+SIREM-SYN-15,Reactivación gradual tras agotamiento,ALL,8,1.760661,0.285044,0.226716,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-15.json
+SIREM-SYN-16,Solo DEAM · Melancolía a Calma,DEAM,5,1.017734,0.25,0.347922,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-16.json
+SIREM-SYN-17,Solo PMEmo · Tensión a Calma,PMEmo,7,1.688343,0.334562,0.262562,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-17.json
+SIREM-SYN-18,Sobrecarga cognitiva a equilibrio neutral,ALL,6,1.241486,0.28249,0.230489,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-18.json
+SIREM-SYN-19,Baja energía a optimismo sereno,ALL,5,1.138445,0.305164,0.226716,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-19.json
+SIREM-SYN-20,Alta activación neutra a serenidad profunda,ALL,7,1.491957,0.287606,0.18868,True,True,True,True,True,True,Verificado y Aceptado,AH + KP,docs/fichas_sinteticas/SIREM-SYN-20.json

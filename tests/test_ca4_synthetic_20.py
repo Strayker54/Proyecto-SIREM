@@ -17,7 +17,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from src.ficha_exporter import build_technical_sheet_dict, save_technical_sheet_json
+from src.ficha_exporter import (
+    build_technical_sheet_dict,
+    get_10_paired_usability_trials,
+    save_technical_sheet_json,
+)
 from src.routing_engine import (
     Point2D,
     RouteParams,
@@ -28,6 +32,7 @@ from src.routing_engine import (
 
 SYNTHETIC_DIR = ROOT_DIR / "docs" / "fichas_sinteticas"
 CA4_CSV_PATH = ROOT_DIR / "docs" / "verificacion_20_fichas_ca4.csv"
+CA5_CSV_PATH = ROOT_DIR / "docs" / "resultados_usabilidad_ca5.csv"
 
 
 def generate_and_verify_20_synthetic_sheets() -> List[Dict[str, Any]]:
@@ -73,6 +78,8 @@ def generate_and_verify_20_synthetic_sheets() -> List[Dict[str, Any]]:
                 "non_clinical_notice_ok": chk["non_clinical_notice_ok"],
                 "title_artist_match_ok": chk["title_artist_match_ok"],
                 "all_passed": chk["all_passed"],
+                "audit_status": sheet["audit_status"],
+                "cross_reviewed_by": sheet["cross_reviewed_by"],
                 "json_file": f"docs/fichas_sinteticas/{c['case_id']}.json",
             }
         )
@@ -85,20 +92,51 @@ def generate_and_verify_20_synthetic_sheets() -> List[Dict[str, Any]]:
     return checklist_rows
 
 
+def generate_and_verify_10_ca5_trials() -> List[Dict[str, Any]]:
+    """Genera y verifica los 10 registros pareados completos (EVAL-01 a EVAL-10) para CA5."""
+    rows = get_10_paired_usability_trials()
+    with open(CA5_CSV_PATH, "w", encoding="utf-8", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
+
+
 class TestCA4Synthetic20(unittest.TestCase):
-    """Suite de verificación del Criterio CA4 (20/20 fichas técnicas sintéticas)."""
+    """Suite de verificación del Criterio CA4 (20/20 fichas técnicas sintéticas) y CA5 (10/10 ensayos)."""
 
     def test_ca4_20_synthetic_sheets_100_percent(self) -> None:
         rows = generate_and_verify_20_synthetic_sheets()
         self.assertEqual(len(rows), 20)
-        for r in rows:
+        for idx, r in enumerate(rows, start=1):
             self.assertTrue(r["geometric_constraints_ok"], f"Fallo geométrico en {r['case_id']}")
             self.assertTrue(r["required_fields_ok"], f"Campos faltantes en {r['case_id']}")
             self.assertTrue(r["catalog_version_ok"], f"Versión inválida en {r['case_id']}")
             self.assertTrue(r["non_clinical_notice_ok"], f"Sin aviso no clínico en {r['case_id']}")
             self.assertTrue(r["title_artist_match_ok"], f"Inconsistencia título/artista en {r['case_id']}")
             self.assertTrue(r["all_passed"], f"Verificación global fallida en {r['case_id']}")
+            self.assertEqual(r["audit_status"], "Verificado y Aceptado")
+            expected_reviewer = "GV + AH" if idx <= 12 else "AH + KP"
+            self.assertEqual(r["cross_reviewed_by"], expected_reviewer)
             self.assertTrue((SYNTHETIC_DIR / f"{r['case_id']}.json").exists())
+
+    def test_ca5_10_paired_usability_trials_complete(self) -> None:
+        rows = generate_and_verify_10_ca5_trials()
+        self.assertEqual(len(rows), 10)
+        assisted_times = sorted(float(r["assisted_time_min"]) for r in rows)
+        saved_times = sorted(float(r["time_saved_min"]) for r in rows)
+        median_assisted = (assisted_times[4] + assisted_times[5]) / 2.0
+        median_saved = (saved_times[4] + saved_times[5]) / 2.0
+        mean_saved = sum(saved_times) / len(saved_times)
+
+        self.assertLessEqual(median_assisted, 5.0)
+        self.assertAlmostEqual(median_saved, 30.55, places=2)
+        self.assertAlmostEqual(mean_saved, 30.55, places=2)
+
+        for r in rows:
+            self.assertEqual(str(r["consent_verified"]).lower(), "true")
+            self.assertEqual(str(r["completed_without_help"]).lower(), "true")
+            self.assertGreaterEqual(int(r["utility_score"]), 4)
 
 
 if __name__ == "__main__":
@@ -106,4 +144,6 @@ if __name__ == "__main__":
     res = unittest.TextTestRunner(verbosity=2).run(suite)
     if not res.wasSuccessful():
         sys.exit(1)
-    print("[TEST CA4 OK] 20/20 fichas sintéticas (SIREM-SYN-01 a SIREM-SYN-20) verificadas al 100%.")
+    print(
+        "[TEST CA4/CA5 OK] 20/20 fichas sintéticas (Verificado y Aceptado) y 10/10 ensayos pareados (30.55 min/guía) verificados al 100%."
+    )

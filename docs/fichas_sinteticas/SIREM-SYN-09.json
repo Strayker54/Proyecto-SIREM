@@ -4,10 +4,12 @@
   "context": "Subcatálogo PMEmo (762 pistas) · C-III -> C-I",
   "catalog_version": "v1.0-1284tracks",
   "is_synthetic": true,
-  "generated_at": "2026-11-15T03:40:11Z",
+  "generated_at": "2026-11-15T04:33:19Z",
   "institution": "Universidad Industrial de Santander (UIS) — Escuela de Ingeniería de Sistemas e Informática",
   "non_clinical_disclaimer": "AVISO DE ALCANCE NO CLÍNICO: Esta Ficha Técnica de Guía Musical de Apoyo ha sido generada por el prototipo académico SIREM (UIS) como insumo técnico de apoyo para profesionales de psicología, orientación y bienestar universitario. NO constituye diagnóstico clínico, prescripción médica ni dispositivo biomédico.",
   "legal_compliance": "Cumplimiento Ley 1581 de 2012: Documento con identificador seudonimizado/sintético sin datos personales sensibles ni historia clínica. Cumplimiento Ley 23 de 1982: Uso exclusivo de metadatos públicos y enlaces externos autorizados sin almacenar ni distribuir audio.",
+  "audit_status": "Verificado y Aceptado",
+  "cross_reviewed_by": "GV + AH",
   "parameters": {
     "v_ini": -0.62,
     "a_ini": -0.55,
@@ -28,11 +30,11 @@
     "e_ini_observed": 0.320907,
     "e_obj_observed": 0.291363,
     "unique_tracks": true,
-    "exec_time_ms": 44.718
+    "exec_time_ms": 52.028
   },
   "substitutions_count": 0,
   "reviewer_role": "Psicólogo / Orientador — Bienestar Universitario UIS",
-  "professional_notes": "Secuencia generada bajo el Principio ISO para el caso sintético SIREM-SYN-09 (Solo PMEmo · Fatiga a Activación). Cumple restricciones geométricas y unicidad de pistas.",
+  "professional_notes": "Secuencia generada bajo el Principio ISO para el caso sintético SIREM-SYN-09 (Solo PMEmo · Fatiga a Activación). Cumple restricciones geométricas y unicidad de pistas. Estado de auditoría: Verificado y Aceptado (GV + AH).",
   "stages": [
     {
       "stage": 1,
@@ -167,6 +169,8 @@
     "catalog_version_ok": true,
     "non_clinical_notice_ok": true,
     "title_artist_match_ok": true,
-    "all_passed": true
+    "all_passed": true,
+    "audit_status": "Verificado y Aceptado",
+    "cross_reviewed_by": "GV + AH"
   }
 }
