@@ -407,9 +407,27 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
             )}
           </div>
 
+          <div className="p-3 rounded-md bg-slate-50 border border-slate-200 text-[11px] text-slate-700 space-y-1">
+            <p className="font-semibold text-slate-900">
+              Arquitectura segura de 3 credenciales (Frontend + Backend Python):
+            </p>
+            <p>
+              • En <code className="font-mono">frontend/.env</code> (o en este formulario) configure{' '}
+              <code className="font-mono">VITE_SUPABASE_URL</code> y{' '}
+              <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> (clave pública{' '}
+              <code className="font-mono">anon</code>).
+            </p>
+            <p>
+              • La clave privada <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> debe
+              colocarse <strong>exclusivamente</strong> en el archivo <code className="font-mono">/.env</code>{' '}
+              de la raíz para sincronización administrativa desde consola con{' '}
+              <code className="font-mono">python src/supabase_sync.py</code>.
+            </p>
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="supabase-url" className="block text-xs font-medium text-slate-700">
-              VITE_SUPABASE_URL
+              VITE_SUPABASE_URL (URL del proyecto)
             </label>
             <input
               id="supabase-url"
@@ -423,7 +441,7 @@ export const SupabaseConfigModule: React.FC<SupabaseConfigModuleProps> = ({
 
           <div className="space-y-1.5">
             <label htmlFor="supabase-key" className="block text-xs font-medium text-slate-700">
-              VITE_SUPABASE_ANON_KEY
+              VITE_SUPABASE_ANON_KEY (Clave pública anon)
             </label>
             <input
               id="supabase-key"

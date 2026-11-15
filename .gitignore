@@ -5,14 +5,12 @@ dist/
 frontend/dist/
 .vite/
 
-# Variables de entorno locales y secretos
+# Variables de entorno locales y secretos (NUNCA subir claves reales a Git)
 .env
-.env.local
-.env.*.local
-frontend/.env
-frontend/.env.local
-frontend/.env.*.local
+.env.*
 !.env.example
+frontend/.env
+frontend/.env.*
 !frontend/.env.example
 
 # Entornos virtuales y caché de Python

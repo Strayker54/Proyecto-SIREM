@@ -79,15 +79,19 @@ const STORAGE_KEYS = {
   savedGuides: 'sirem_uis_saved_guides_v1',
 };
 
-const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const rawEnvUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+const rawEnvKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+
+const envUrl = rawEnvUrl.includes('tu-proyecto.supabase.co') ? '' : rawEnvUrl;
+const envKey = rawEnvKey.includes('tu-clave-publica') ? '' : rawEnvKey;
+const hasRealEnvCredentials = Boolean(envUrl.startsWith('https://') && envKey.length > 20);
 
 /** Configuración inicial por defecto para el cliente de Supabase */
 export const DEFAULT_SUPABASE_CONFIG: SupabaseConfig = {
   url: envUrl,
   anonKey: envKey,
   tablePrefix: 'public.',
-  connected: false,
+  connected: hasRealEnvCredentials,
   lastSyncAt: null,
 };
 
@@ -97,11 +101,16 @@ export function loadSupabaseConfig(): SupabaseConfig {
     const raw = localStorage.getItem(STORAGE_KEYS.supabaseConfig);
     if (!raw) return DEFAULT_SUPABASE_CONFIG;
     const parsed = JSON.parse(raw) as Partial<SupabaseConfig>;
+    const resolvedUrl =
+      parsed.url && !parsed.url.includes('tu-proyecto.supabase.co') ? parsed.url : envUrl;
+    const resolvedKey =
+      parsed.anonKey && !parsed.anonKey.includes('tu-clave-publica') ? parsed.anonKey : envKey;
     return {
       ...DEFAULT_SUPABASE_CONFIG,
       ...parsed,
-      url: parsed.url || envUrl,
-      anonKey: parsed.anonKey || envKey,
+      url: resolvedUrl,
+      anonKey: resolvedKey,
+      connected: Boolean(parsed.connected || (resolvedUrl.startsWith('https://') && resolvedKey)),
     };
   } catch {
     return DEFAULT_SUPABASE_CONFIG;
@@ -122,7 +131,12 @@ export function createSiremSupabaseClient(customConfig?: SupabaseConfig): Supaba
   const cfg = customConfig ?? loadSupabaseConfig();
   const cleanUrl = cfg.url.trim().replace(/\/+$/, '');
   const cleanKey = cfg.anonKey.trim();
-  if (!cleanUrl.startsWith('https://') || !cleanKey) {
+  if (
+    !cleanUrl.startsWith('https://') ||
+    cleanUrl.includes('tu-proyecto.supabase.co') ||
+    !cleanKey ||
+    cleanKey.includes('tu-clave-publica')
+  ) {
     return null;
   }
   try {
