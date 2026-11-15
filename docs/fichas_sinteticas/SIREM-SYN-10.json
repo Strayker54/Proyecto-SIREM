@@ -4,7 +4,7 @@
   "context": "Taller grupal · C-II/Centro -> C-IV",
   "catalog_version": "v1.0-1284tracks",
   "is_synthetic": true,
-  "generated_at": "2026-11-14T22:08:05Z",
+  "generated_at": "2026-11-15T03:40:11Z",
   "institution": "Universidad Industrial de Santander (UIS) — Escuela de Ingeniería de Sistemas e Informática",
   "non_clinical_disclaimer": "AVISO DE ALCANCE NO CLÍNICO: Esta Ficha Técnica de Guía Musical de Apoyo ha sido generada por el prototipo académico SIREM (UIS) como insumo técnico de apoyo para profesionales de psicología, orientación y bienestar universitario. NO constituye diagnóstico clínico, prescripción médica ni dispositivo biomédico.",
   "legal_compliance": "Cumplimiento Ley 1581 de 2012: Documento con identificador seudonimizado/sintético sin datos personales sensibles ni historia clínica. Cumplimiento Ley 23 de 1982: Uso exclusivo de metadatos públicos y enlaces externos autorizados sin almacenar ni distribuir audio.",
@@ -28,7 +28,7 @@
     "e_ini_observed": 0.261126,
     "e_obj_observed": 0.262562,
     "unique_tracks": true,
-    "exec_time_ms": 60.455
+    "exec_time_ms": 40.303
   },
   "substitutions_count": 0,
   "reviewer_role": "Psicólogo / Orientador — Bienestar Universitario UIS",

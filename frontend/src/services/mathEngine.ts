@@ -986,8 +986,8 @@ export function runExperimentalBattery(
       x_ini: sc.x_ini,
       x_obj: sc.x_obj,
       m: sc.m,
-      seed: 2026 + i * 17,
-      markovBudget: 40,
+      seed: 2026 + (i + 1),
+      markovBudget: 50,
     };
     const z = computeIdealTrajectory(params.x_ini, params.x_obj, params.m);
     const dRes = solveDijkstra(catalog, params, z);

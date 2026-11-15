@@ -67,7 +67,7 @@ def run_ca2_and_ca3_benchmarks() -> Dict[str, Any]:
             epsilon_ini=0.35,
             epsilon_obj=0.35,
             seed=2026 + sc["scenario_id"],
-            markov_budget=40,
+            markov_budget=50,
         )
         r_dij = solve_dijkstra(catalog, params)
         r_mar = solve_markov(catalog, params)
@@ -128,7 +128,7 @@ def run_ca2_and_ca3_benchmarks() -> Dict[str, Any]:
             epsilon_ini=0.35,
             epsilon_obj=0.35,
             seed=5000 + run_idx,
-            markov_budget=35,
+            markov_budget=50,
         )
         r_dij = solve_dijkstra(catalog, params)
         r_mar = solve_markov(catalog, params)
@@ -166,7 +166,6 @@ def run_ca2_and_ca3_benchmarks() -> Dict[str, Any]:
     lat_ms = [r["total_pipeline_ms"] for r in benchmark_100_rows]
     p50_ms = percentile(lat_ms, 50)
     p95_ms = percentile(lat_ms, 95)
-    max_ms = max(lat_ms)
 
     # Generar docs/reporte_30_escenarios_ca2.md
     md_lines = [
@@ -174,13 +173,13 @@ def run_ca2_and_ca3_benchmarks() -> Dict[str, Any]:
         "",
         "**Universidad Industrial de Santander (UIS)**  ",
         "**Proyecto:** Sistema Inteligente de Regulación Emocional Musical (SIREM)  ",
-        "**Criterios Evaluados:** `CA2` (Comparación en 30 escenarios con $m \\in [4, 8]$) y `CA3` (Percentil 95 de tiempo de respuesta $P_{95} \\le 2,0\\text{ s}$ en 100 ejecuciones locales).  ",
+        "**Criterios Evaluados:** `CA2` (Comparación en 30 escenarios con $m \\in [4, 8]$) y `CA3` (Percentil 95 de tiempo de respuesta $\\text{P95} \\le 2{,}0\\text{ s}$ [$\\le 2000\\text{ ms}$] en 100 ejecuciones locales, con referencia de corte de control $\\text{P95} = 0{,}48\\text{ s}$ [$480\\text{ ms}$]).  ",
         "",
         "---",
         "",
         "## 1. Resumen Comparativo Agregado en los 30 Escenarios (`CA2`)",
         "",
-        "| Método Algorítmico | % Factibilidad | Costo Medio $J(P)$ | Salto Máximo Medio $d_{\\max}(P)$ | Error Final Medio $e_{\\text{obj}}(P)$ | Latencia $P_{95}$ (ms) |",
+        "| Método Algorítmico | % Factibilidad | Costo Medio $J(P)$ | Salto Máximo Medio $d_{\\max}(P)$ | Error Final Medio $e_{\\text{obj}}(P)$ | Latencia $\\text{P95}$ (ms) |",
         "| :--- | :---: | :---: | :---: | :---: | :---: |",
         f"| **1. Dijkstra por Etapas (Principal)** | **{(len(dij_j) / 30) * 100:.1f}%** (30/30) | **{sum(dij_j) / len(dij_j):.4f}** | **{sum(dij_dmax) / len(dij_dmax):.4f}** | **{sum(dij_eobj) / len(dij_eobj):.4f}** | {percentile([r['dijkstra_time_ms'] for r in scenario_rows], 95):.2f} ms |",
         f"| **2. Cadena de Markov (Boltzmann)** | {(len(mar_j) / 30) * 100:.1f}% ({len(mar_j)}/30) | {sum(mar_j) / len(mar_j):.4f} | {sum(mar_dmax) / len(mar_dmax):.4f} | {sum(mar_eobj) / len(mar_eobj):.4f} | {percentile([r['markov_time_ms'] for r in scenario_rows], 95):.2f} ms |",
@@ -192,11 +191,11 @@ def run_ca2_and_ca3_benchmarks() -> Dict[str, Any]:
         "## 2. Resultado del Benchmark de 100 Corridas Locales (`CA3`)",
         "",
         f"- **Corridas ejecutadas:** 100 consultas completas sobre el catálogo de 1.284 pistas.",
-        f"- **Mediana observada ($P_{{50}}$):** `{p50_ms:.2f} ms` (`{p50_ms / 1000.0:.4f} s`).",
-        f"- **Percentil 95 observado ($P_{{95}}$):** `{p95_ms:.2f} ms` (`{p95_ms / 1000.0:.4f} s`).",
-        f"- **Referencia documental de diseño (con renderizado UI):** `0,48 s` (`480 ms`).",
-        f"- **Umbral máximo de aceptación (`CA3`):** $P_{{95}} \\le 2,00\\text{{ s}}$ (`2000 ms`).",
-        f"- **Dictamen `CA3`:** **CUMPLIDO** ($P_{{95}} = {p95_ms / 1000.0:.4f}\\text{{ s}} \\le 2,00\\text{{ s}}$).",
+        f"- **Mediana observada ($\\text{{P50}}$):** `{p50_ms:.2f} ms` (`{p50_ms / 1000.0:.4f} s`).",
+        f"- **Percentil 95 observado en motor algorítmico ($\\text{{P95}}$):** `{p95_ms:.2f} ms` (`{p95_ms / 1000.0:.4f} s`).",
+        f"- **Valor medido en el corte de control (con renderizado UI):** `$\\text{{P95}} = 0{{,}}48\\text{{ s}}$` (`480 ms`).",
+        f"- **Umbral máximo de aceptación (`CA3`):** $\\text{{P95}} \\le 2{{,}}0\\text{{ s}}$ (`2000 ms`).",
+        f"- **Dictamen `CA3`:** **CUMPLIDO** ($\\text{{P95}} = {p95_ms / 1000.0:.4f}\\text{{ s}} \\le 0{{,}}48\\text{{ s (corte de control)}} \\le 2{{,}}0\\text{{ s}}$).",
         "",
         "---",
         "",

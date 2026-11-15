@@ -106,8 +106,8 @@ def load_parameters() -> Dict[str, Any]:
 
 DEFAULT_HYPERPARAMETERS: Dict[str, Any] = {
     "lambda": 0.65,
-    "delta": 0.45,
-    "beta": 6.0,
+    "delta": 0.65,
+    "beta": 5.0,
     "epsilon_ini": 0.35,
     "epsilon_obj": 0.35,
     "default_m_stages": 6,

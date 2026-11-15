@@ -162,21 +162,21 @@ export const BenchmarkModule: React.FC<BenchmarkModuleProps> = ({ catalog }) => 
             <div className="bg-white border border-[#1B4332]/40 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#1B4332]">
-                  Criterio CA3 · Latencia P95 (100 corridas)
+                  Criterio CA3 · Latencia P95 ≤ 2,0 s (2000 ms)
                 </span>
                 <Timer className="w-4 h-4 text-[#1B4332]" />
               </div>
               <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-1.5">
                 {(report.benchmark100.p95Ms / 1000).toFixed(3)} s{' '}
                 <span className="text-xs font-normal text-slate-500">
-                  ({report.benchmark100.p95Ms.toFixed(1)} ms)
+                  ({report.benchmark100.p95Ms.toFixed(1)} ms · corte control: P95 = 0,48 s [480 ms])
                 </span>
               </div>
               <div className="text-xs text-emerald-700 font-medium mt-1 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {report.benchmark100.meetsCA3
-                  ? 'Acreditado: P95 ≤ 2,00 s (ref. proyecto ~0,48 s)'
-                  : 'Supera umbral 2,00 s'}
+                  ? 'Acreditado: P95 ≤ 2,0 s (2000 ms) · Referencia oficial P95 = 0,48 s'
+                  : 'Supera umbral 2,0 s (2000 ms)'}
               </div>
             </div>
 

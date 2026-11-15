@@ -69,7 +69,7 @@ class RouteParams:
     epsilon_obj: float = 0.35
     source_filter: str = "ALL"
     seed: int = 2026
-    markov_budget: int = 45
+    markov_budget: int = 50
 
 
 @dataclass
