@@ -7,10 +7,26 @@ Herramienta académica de apoyo técnico a profesionales de psicología, orienta
 ---
 
 ## Equipo de Trabajo (Escuela de Ingeniería de Sistemas e Informática — UIS)
-- **Andrés Santiago Marín Forero** — Dirección, Finanzas, Cronograma y Línea Base MGA
-- **Anthoni Lexandre Hernández Díaz** — Arquitectura Musical y Motor Algorítmico (Dijkstra / Markov)
-- **Karol Yamile Palomino Prada** — Ingeniería de Datos, Limpieza y Normalización (DEAM + PMEmo)
-- **Giselle Alejandra Vesga Romero** — Interfaz Web, Ficha Técnica, Usabilidad y Gestión de Riesgos
+- **Andrés Santiago Marín Forero** (`2243556`) — Dirección, Finanzas, Cronograma y Línea Base MGA
+- **Anthoni Lexandre Hernández Díaz** (`2191198`) — Arquitectura Musical y Motor Algorítmico (Dijkstra / Markov)
+- **Karol Yamile Palomino Prada** (`2243579`) — Ingeniería de Datos, Limpieza y Normalización (DEAM + PMEmo)
+- **Giselle Alejandra Vesga Romero** (`2243603`) — Interfaz Web, Ficha Técnica, Usabilidad y Gestión de Riesgos
+- **Docente Directora:** Ing. Sylvia Carolina Mesa Morales
+
+---
+
+## Presentación Oficial de Sustentación (`14 Diapositivas`)
+
+El archivo de sustentación final del proyecto se encuentra disponible en la carpeta documental del repositorio:
+
+- 📊 **[Presentación del Proyecto)](docs/SIREM_Sustentacion_14_diapositivas.pdf)** *(PowerPoint `.pdf` con las 14 diapositivas oficiales, gráficas de resultados y notas de orador detalladas por lámina)*.
+
+| Diapositivas | Bloque Temático de Sustentación | Contenido Principal y Evidencia Asociada |
+| :---: | :--- | :--- |
+| **`01 – 03`** | **Contexto, Problema y Fundamento Teórico** | Propósito operativo (35 min $\rightarrow$ 5 min por guía), Modelo Circumplejo de Russell $[-1, 1]^2$ y los 3 momentos geométricos del Principio ISO ($\varepsilon_{\text{ini}}$, paso $\delta$, $\varepsilon_{\text{obj}}$). |
+| **`04 – 06`** | **Arquitectura e Ingeniería de Datos (`CA1`)** | Arquitectura híbrida (`Python` + `React 19 / TypeScript` + `Supabase PostgreSQL`), cumplimiento normativo (Leyes 23/1982, 1581/2012 y SST), catálogo de 1.284 registros y auditoría en las 5 dimensiones de calidad de datos. |
+| **`07 – 10`** | **Motor Matemático, Aplicativo Web y Validación (`CA2–CA4`)** | Formulación de $J(P)$, motor dual (Dijkstra por etapas vs. Cadenas de Markov-Boltzmann), flujo de 3 pasos en la aplicación web, 30 escenarios experimentales, 100 corridas de latencia y 20 fichas sintéticas (`20/20 all_passed`). |
+| **`11 – 14`** | **Evaluación Económica MGA, Sensibilidad, Cierre y Conclusiones (`CA5`)** | Evaluación financiera a 4 años ($9{,}0\%\text{ E.A.}$, VPN y TIR en escenario SC-01 y cierre Excel/Project), análisis de sensibilidad, riesgos (VME), medidas SST, conciliación de 72 h en MS Project y conclusiones generales. |
 
 ---
 
@@ -45,6 +61,7 @@ Proyecto-SIREM/
 │   └── migrations/
 │       └── 20261105_sirem_schema.sql # Esquema PostgreSQL de las 4 tablas (catalog_tracks, musical_guides, benchmark_scenarios, usability_trials)
 ├── docs/
+│   ├── SIREM_Sustentacion_14_diapositivas.pptx # Presentación oficial de sustentación final (14 diapositivas + notas de orador)
 │   ├── diccionario_datos_v1.md       # Diccionario de variables y reglas de normalización lineal
 │   ├── reporte_auditoria_ca1.md      # Embudo de depuración (2.596 -> 1.284) y distribución por cuadrante
 │   ├── reporte_30_escenarios_ca2.csv # Resultados detallados de los 30 escenarios experimentales (CA2)
